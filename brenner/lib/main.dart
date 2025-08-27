@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'spotify.dart';
 
 // --- MODELO DE DADOS ---
-// É uma boa prática criar uma classe para seus dados.
-// Isso torna o código mais limpo e fácil de manter.
 enum Dificuldade { Facil, Intermediario, Dificil }
 
 class Partitura {
@@ -17,8 +16,7 @@ class Partitura {
   });
 }
 
-// --- DADOS MOCK (Simulando uma API) ---
-// Em um app real, isso viria de um banco de dados ou uma API.
+// --- DADOS MOCK ---
 final List<Partitura> mockPartituras = [
   const Partitura(titulo: 'Stairway to Heaven', artista: 'Led Zeppelin', dificuldade: Dificuldade.Dificil),
   const Partitura(titulo: 'Nothing Else Matters', artista: 'Metallica', dificuldade: Dificuldade.Intermediario),
@@ -27,7 +25,6 @@ final List<Partitura> mockPartituras = [
   const Partitura(titulo: 'Imagine', artista: 'John Lennon', dificuldade: Dificuldade.Facil),
   const Partitura(titulo: 'Hallelujah', artista: 'Leonard Cohen', dificuldade: Dificuldade.Facil),
 ];
-
 
 void main() {
   runApp(const BrennerApp());
@@ -40,31 +37,32 @@ class BrennerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Brenner',
-      debugShowCheckedModeBanner: false, // Remove o banner de debug
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF121212),
         colorScheme: const ColorScheme.dark(
           primary: Colors.deepPurpleAccent,
           secondary: Colors.amberAccent,
-          surface: Color(0xFF1E1E1E), // Cor de fundo para Cards, etc.
+          surface: Color.fromARGB(255, 129, 117, 117),
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
           centerTitle: true,
         ),
-        cardTheme: CardThemeData( // Correto
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        cardTheme: CardThemeData(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
-      ),
       ),
       home: const MainPage(),
     );
   }
 }
 
+// --- MAIN PAGE ---
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -75,12 +73,19 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
-  // As páginas agora são instanciadas aqui para manter o estado (se necessário no futuro)
-  static final List<Widget> _pages = <Widget>[
-    const HomePage(),
-    const SearchPage(),
-    const ProfilePage(),
-  ];
+  final SpotifyService spotifyService = SpotifyService();
+
+  static late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      const HomePage(),
+      SearchPage(spotifyService: spotifyService),
+      const ProfilePage(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -91,7 +96,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack( // Usa IndexedStack para preservar o estado de cada página
+      body: IndexedStack(
         index: _selectedIndex,
         children: _pages,
       ),
@@ -119,11 +124,10 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-// --- PÁGINA HOME ---
+// --- HOME PAGE ---
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  // Widget para o Chip de dificuldade, para reutilização
   Widget _buildDifficultyChip(Dificuldade dificuldade) {
     Color chipColor;
     String label;
@@ -151,13 +155,10 @@ class HomePage extends StatelessWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Minhas Partituras'),
-      ),
+      appBar: AppBar(title: const Text('Minhas Partituras')),
       body: ListView.builder(
         padding: const EdgeInsets.all(8.0),
         itemCount: mockPartituras.length,
@@ -172,7 +173,6 @@ class HomePage extends StatelessWidget {
               subtitle: Text(partitura.artista, style: TextStyle(color: Colors.grey[400])),
               trailing: _buildDifficultyChip(partitura.dificuldade),
               onTap: () {
-                // Navegação para a página de detalhes da partitura
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -188,59 +188,65 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// --- PÁGINA DE BUSCA ---
+// --- SEARCH PAGE ---
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final SpotifyService spotifyService;
+  const SearchPage({super.key, required this.spotifyService});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> spotifyTracks = [];
+  bool loading = false;
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    loadSpotifyTopTracks();
   }
-  
+
+  void loadSpotifyTopTracks() async {
+    setState(() => loading = true);
+    try {
+      await widget.spotifyService.login();
+      final tracks = await widget.spotifyService.getTopTracks();
+      setState(() {
+        spotifyTracks = tracks;
+      });
+    } catch (e) {
+      print('Erro Spotify: $e');
+    } finally {
+      setState(() => loading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Buscar Músicas'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Nome da música ou artista',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () => _searchController.clear(),
-                )
-              ),
-              onChanged: (value) {
-                // Aqui você implementaria a lógica de busca em tempo real
+      appBar: AppBar(title: const Text('Buscar Músicas')),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: spotifyTracks.length,
+              itemBuilder: (context, index) {
+                final track = spotifyTracks[index];
+                return Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.music_note),
+                    title: Text(track['name']),
+                    subtitle: Text(track['artists']),
+                  ),
+                );
               },
             ),
-            // pesquisa
-          ],
-        ),
-      ),
     );
   }
 }
 
-// --- PÁGINA DE PERFIL ---
+// --- PROFILE PAGE ---
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -248,48 +254,21 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-      ),
+      appBar: AppBar(title: const Text('Perfil')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               const CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage('https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTdpIz5LgulAXYzUQoBxwSq4zx9CtiZv1WUNys3okHg8GUqwF0N05oHqIAYilbVKaleWRLmZbYv0wWisWFmiqos4K_AmnXmclf4FBgoXmJLNw'), 
+                backgroundImage: NetworkImage('https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTdpIz5LgulAXYzUQoBxwSq4zx9CtiZv1WUNys3okHg8GUqwF0N05oHqIAYilbVKaleWRLmZbYv0wWisWFmiqos4K_AmnXmclf4FBgoXmJLNw'),
               ),
               const SizedBox(height: 20),
-              Text(
-                'Brenner Silva',
-                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-              ),
+              Text('Brenner Silva', style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text(
-                'brenner.silva@email.com',
-                style: textTheme.titleMedium?.copyWith(color: Colors.grey),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.edit),
-                label: const Text('Editar Perfil'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.logout),
-                label: const Text('Sair'),
-                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                ),
-              ),
+              Text('brenner.silva@email.com', style: textTheme.titleMedium?.copyWith(color: Colors.grey)),
             ],
           ),
         ),
@@ -298,20 +277,16 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-
-// --- PÁGINA DE DETALHES DA PARTITURA ---
+// --- PARTITURA DETAIL PAGE ---
 class PartituraDetailPage extends StatelessWidget {
   final Partitura partitura;
 
-  PartituraDetailPage({super.key, required this.partitura});
+  const PartituraDetailPage({super.key, required this.partitura});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(partitura.titulo),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-      ),
+      appBar: AppBar(title: Text(partitura.titulo), backgroundColor: Theme.of(context).colorScheme.surface),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -320,11 +295,7 @@ class PartituraDetailPage extends StatelessWidget {
             const SizedBox(height: 20),
             const Icon(Icons.article_outlined, size: 150, color: Colors.grey),
             const SizedBox(height: 20),
-            const Text(
-              'A visualização da partitura aparecerá aqui.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
-            ),
+            const Text('A visualização da partitura aparecerá aqui.', textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
           ],
         ),
       ),
