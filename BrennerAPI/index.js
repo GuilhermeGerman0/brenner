@@ -97,13 +97,27 @@ app.get("/Usuarios", async (req, res) => {
     res.json(results)
 })
 
+// Pesquisa por username
+
+app.get("/Usuarios/username/:username", async (req, res) => {
+    const username = req.params.username
+    console.log("Username pego: ", username)
+
+    if(!username){
+        return res.status(400).json({error: "Não conseguiu pegar o username"})
+    }
+    
+    const results = await execQuery(`select * from brenner.Usuarios where username = '${username}'`)
+    res.json(results)
+})
 // Pesquisa por id
 
-app.get("/Usuarios/:id", async (req, res) => {
+app.get("/Usuarios/id/:id", async (req, res) => {
     const id = parseInt(req.params.id)
     const results = await execQuery("select * from brenner.Usuarios where idUsuario = " + id)
     res.json(results)
 })
+
 
 // Inserir
 
