@@ -5,6 +5,10 @@ const express = require('express')
 const app = express()
 const mssql = require('mssql')
 const cors = require('cors')
+const multer = require("multer")
+const path = require("path")
+
+
 
 app.use(express.json())
 
@@ -32,13 +36,15 @@ async function execQuery(querySQL) {
 
 // ------------ Rotas de Músicas ------------
 
+// Pesquisa por Nome
+
 app.get("/Musicas/:nome", async (req, res) => {
     const nome = req.params.nome.toLowerCase()
     const results = await execQuery("select * from brenner.Musicas where nomeMusica = '" + nome + "'")
     res.json(results)
 })
 
-// Pesquisa por Nome
+// Pesquisar todas as músicas
 
 app.get("/Musicas", async (req, res) => {
     const results = await execQuery("select * from brenner.Musicas")
@@ -110,6 +116,7 @@ app.get("/Usuarios/username/:username", async (req, res) => {
     const results = await execQuery(`select * from brenner.Usuarios where username = '${username}'`)
     res.json(results)
 })
+
 // Pesquisa por id
 
 app.get("/Usuarios/id/:id", async (req, res) => {
@@ -131,6 +138,33 @@ app.post("/Usuarios", async (req, res) => {
 
     res.sendStatus(201)
 })
+
+
+// Tablaturas
+
+
+// Inserir tablaturas
+
+app.post("/Tablaturas", async (req, res) => {
+    const idMusica = req.body.idMusica
+    const idArtista = req.body.idArtista
+    const idUsuario = req.body.idUsuario
+    const conteudo = req.body.conteudo
+    
+    
+    await execQuery(`insert into brenner.Tablaturas (idMusica, idArtista, idUsuario, conteudo) values (${idMusica}, ${idArtista}, ${idUsuario}, '${conteudo}')`)
+
+    res.sendStatus(201)
+})
+
+// Buscar tablaturas
+
+app.get("/Tablaturas/:nomeMusica", async (req, res) => {
+    const nomeMusica = req.params.nomeMusica
+    const results = await execQuery(`select conteudo from brenner.Tablaturas where idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}')`)
+    res.json(results)
+})
+
 
 app.use('/', (req, res) => res.json ({
     message: 'Servidor em execucao!'
