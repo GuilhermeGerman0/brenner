@@ -1,0 +1,83 @@
+Pesquisar todos os usuários:
+
+http://localhost:3030/Usuarios/
+
+GET que pesquisa no banco de dados todas as informações de todos os usuários
+
+retorna idUsuario, username, email e senha de todos os usuarios no bd ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisar por usename:
+
+http://localhost:3030/Usuarios/username/:usernameDoUsuario
+
+GET que pesquisa todas as informações de um usuário somente com o username indicado
+
+retorna idUsuario, username, email e senha de um usuário específico ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisa por id:
+
+http://localhost:3030/Usuarios/id/:idDoUsuario
+
+GET que pesquisa todas as inforações de um usuário somente com o id indicado
+
+retorna idUsuario, username, email e senha de um usuário específico ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Login:
+
+http://localhost:3030/Usuarios/login 
+
+POST que verifica se o usuario pode fazer login
+
+no body.json é colocado o username ou o email (qualquer um dos dois funciona) com a senha indicada
+
+retorna uma mensagem de sucesso se o login for efetuado ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Inserir usuário:
+
+http://localhost:3030/Usuarios/
+
+POST que insere no banco de dados um usuário novo
+
+no body.json é colocado o username, email e senha do novo usuário
+
+retorna uma mensagem de criação ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar usuário por id:
+
+http://localhost:3030/Usuarios/id/:idDoUsuario
+
+DELETE que deleta um usuario do banco de dados com base no id
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar usuário por username:
+
+http://localhost:3030/Usuarios/username/:usernameDoUsuario
+
+DELETE que delata um usuario do banco de dados com base no username
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualiza usuário por id:
+
+http://localhost:3030/Usuarios/id/:idDoUsuario
+
+PUT que atualiza todas as informações de um usuário com base no id dele
+
+no body.json é colocado o username, email e senha que serão alterados (se não tiver todos esses, não funciona)
+
+retorna uma mensagem de sucesso ou uma de erro

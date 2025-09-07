@@ -1,0 +1,11 @@
+deletar por id:
+
+função em que se passa o execQuery, o tipo (se é Musica, Artista ou Usuario - sempre passar com a primeira letra maiúscula) e o id do tipo passado
+deleta a tablatura e a musica/artista/usuario que estavam associadas com ela (depende do que foi passado em tipo)
+
+-------------------------------------------------------------------------------------------------
+
+deletar por nome 
+
+função em que se passa o execQuery, o tipo (se é Musica, Artista ou Usuario - sempre passar com a primeira letra maiúscula), o nomeCampo (se o tipo for usuario passar username, se for musica passar nomeMusica, etc) e o nome do que você vai passar
+deleta a tablatura e a musica/artista/usuario que estavam associadas com ela (depende do que foi passado em tipo)

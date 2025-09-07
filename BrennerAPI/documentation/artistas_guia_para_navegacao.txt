@@ -1,0 +1,62 @@
+Pesquisar todos os artistas:
+
+http://localhost:3030/Artistas
+
+GET que pesquisa todos os artistas do bd 
+
+retorna um vetor com idArtista, nomeArtista e genero de todos os artistas ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisa por nome:
+
+http://localhost:3030/Artistas/:nomeDoArtista
+
+GET que pesquisa um artista específico pelo nome dele 
+
+retorna um vetor com idArtista, nomeArtista e genero do artista ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Inserir artistas:
+
+http://localhost:3030/Artistas/
+
+POST que insere um novo artista no banco de dados
+
+no body.json se coloca nomeArtista e genero para a criação de um artista novo
+
+retorna uma mensagem de criação ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar artista por id:
+
+http://localhost:3030/Artistas/id/:idDoArtista
+
+DELETE que deleta o artista com base no id passado
+
+retorna uma mensagem de sucesso ou de error
+
+-------------------------------------------------------------------------------------------------
+
+Deletar artista pelo nome:
+
+http://localhost:3030/Artistas/nome/:nomeDoArtista
+
+
+DELETE que deleta o artista com base no nome dele
+
+retorna uma mensagem de sucesso ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualizar artista por id:
+
+http://localhost:3030/Artistas/id/:idDoArtista
+
+PUT que atualiza o artista que tem o id passado
+
+no body.json é colocado o nomeArtista e genero que serão atualizados (todos esses parâmetros tem que ser preenchidos para funcionar)
+
+retorna uma mensagem de sucesso ou de erro

@@ -1,0 +1,313 @@
+musicas.js:
+
+
+
+Pesquisa por nome:
+
+http://localhost:3030/Musicas/:nome_da_musica
+
+GET que pesquisa as informações de uma música pelo nome
+
+retorna um vetor com os parâmetros idMusica, nomeMusica, idArtista, album e anoLancamento ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisar todas as músicas:
+
+http://localhost:3030/Musicas/
+
+GET que pesquisa todas as informações de todas as músicas
+
+retorna um vetor com os parâmetros idMusica, nomeMusica, idArtista, album e anoLancamento de todas as músicas ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Inserir música:
+
+http://localhost:3030/Musicas/
+
+POST que insere no banco de dados
+
+no body.json tem que colocar o nomeMusica, nomeArtista, album e anoLancamento desejado
+
+retorna uma mensagem de criação ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar música por id:
+
+http://localhost:3030/Musicas/id/:idDaMusica
+
+DELETE que deleta no banco de dados a música pelo id dela. Se tiver uma tablatura que referencia ela, a tablatura é deletada também
+
+retorna uma mensagem de sucesso ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar música pelo nome:
+
+http://localhost:3030/Musicas/nome/:nomeDaMusica
+
+DELETE que deleta no banco de dados a música pelo nome dela. Se tiver uma tablatura que referencia a musica, ela é apagada também
+
+retorna uma mensagem de sucesso ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualizar uma música pelo id
+
+http://localhost:3030/Musicas/id/:idDaMusica
+
+PUT que atualiza as informações de uma música pelo id dela
+
+no body.json tem que colocar nomeMusica, idArtista, album, anoLancamento que serão atualizados (todos esses parâmetros tem que ser atendidos para que funcione o put)
+
+retorna uma mensagem de criação ou de erro
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+artistas.js
+
+
+
+Pesquisar todos os artistas:
+
+http://localhost:3030/Artistas
+
+GET que pesquisa todos os artistas do bd 
+
+retorna um vetor com idArtista, nomeArtista e genero de todos os artistas ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisa por nome:
+
+http://localhost:3030/Artistas/:nomeDoArtista
+
+GET que pesquisa um artista específico pelo nome dele 
+
+retorna um vetor com idArtista, nomeArtista e genero do artista ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Inserir artistas:
+
+http://localhost:3030/Artistas/
+
+POST que insere um novo artista no banco de dados
+
+no body.json se coloca nomeArtista e genero para a criação de um artista novo
+
+retorna uma mensagem de criação ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar artista por id:
+
+http://localhost:3030/Artistas/id/:idDoArtista
+
+DELETE que deleta o artista com base no id passado
+
+retorna uma mensagem de sucesso ou de error
+
+-------------------------------------------------------------------------------------------------
+
+Deletar artista pelo nome:
+
+http://localhost:3030/Artistas/nome/:nomeDoArtista
+
+
+DELETE que deleta o artista com base no nome dele
+
+retorna uma mensagem de sucesso ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualizar artista por id:
+
+http://localhost:3030/Artistas/id/:idDoArtista
+
+PUT que atualiza o artista que tem o id passado
+
+no body.json é colocado o nomeArtista e genero que serão atualizados (todos esses parâmetros tem que ser preenchidos para funcionar)
+
+retorna uma mensagem de sucesso ou de erro
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+usuarios.js
+
+
+
+Pesquisar todos os usuários:
+
+http://localhost:3030/Usuarios/
+
+GET que pesquisa no banco de dados todas as informações de todos os usuários
+
+retorna idUsuario, username, email e senha de todos os usuarios no bd ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisar por usename:
+
+http://localhost:3030/Usuarios/username/:usernameDoUsuario
+
+GET que pesquisa todas as informações de um usuário somente com o username indicado
+
+retorna idUsuario, username, email e senha de um usuário específico ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisa por id:
+
+http://localhost:3030/Usuarios/id/:idDoUsuario
+
+GET que pesquisa todas as inforações de um usuário somente com o id indicado
+
+retorna idUsuario, username, email e senha de um usuário específico ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Login:
+
+http://localhost:3030/Usuarios/login 
+
+POST que verifica se o usuario pode fazer login
+
+no body.json é colocado o username ou o email (qualquer um dos dois funciona) com a senha indicada
+
+retorna uma mensagem de sucesso se o login for efetuado ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Inserir usuário:
+
+http://localhost:3030/Usuarios/
+
+POST que insere no banco de dados um usuário novo
+
+no body.json é colocado o username, email e senha do novo usuário
+
+retorna uma mensagem de criação ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar usuário por id:
+
+http://localhost:3030/Usuarios/id/:idDoUsuario
+
+DELETE que deleta um usuario do banco de dados com base no id
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar usuário por username:
+
+http://localhost:3030/Usuarios/username/:usernameDoUsuario
+
+DELETE que delata um usuario do banco de dados com base no username
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualiza usuário por id:
+
+http://localhost:3030/Usuarios/id/:idDoUsuario
+
+PUT que atualiza todas as informações de um usuário com base no id dele
+
+no body.json é colocado o username, email e senha que serão alterados (se não tiver todos esses, não funciona)
+
+retorna uma mensagem de sucesso ou uma de erro
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+tablaturas.js
+
+
+
+Inserir tablatura:
+
+http://localhost:3030/Tablaturas
+
+POST que insere uma tablatura nova
+
+no body.json tem que colocar o idArtista, idDaMusica, idDoUsuario e conteudo da tablatura (conteudo sendo a string com a tab [não pode colocar na string os seguintes caracteres: ', ", /]) ------- tem que fazer um insert que faz pelos nomes invés dos ids 
+
+retorna uma mensagem de criação ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisa pelo nome da música:
+
+http://localhost:3030/Tablaturas/:nomeDaMusica 
+
+GET que pesquisa a tablatura de uma música pelo nome dela
+
+retorna conteudo de uma musica ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar tablatura pelo id
+
+http://localhost:3030/Tablaturas/id/:idDaTablatura
+
+DELETE que deleta do bd a tablatura pelo id
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar tablatura pelo nome da música
+
+http://localhost:3030/Tablaturas/nome/:nomeDaMusica
+
+DELETE que deleta todas as tablaturas com o nome passado
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualizar tablatura pelo id:
+
+http://localhost:3030/Tablaturas/id/:idDaTablatura
+
+PUT que atualiza todas as informações de uma tablatura com base no id dela
+
+no body.json se coloca o idArtista, idArtista, idDoUsuario e conteudo para atualizar (todos os parâmetros precisam estar preenchido para funcionar)
+
+retorna uma mensagem de sucesso ou uma de erro
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+deletarTablaturaService.js
+
+deletar por id:
+
+função em que se passa o execQuery, o tipo (se é Musica, Artista ou Usuario - sempre passar com a primeira letra maiúscula) e o id do tipo passado
+deleta a tablatura e a musica/artista/usuario que estavam associadas com ela (depende do que foi passado em tipo)
+
+-------------------------------------------------------------------------------------------------
+
+deletar por nome 
+
+função em que se passa o execQuery, o tipo (se é Musica, Artista ou Usuario - sempre passar com a primeira letra maiúscula), o nomeCampo (se o tipo for usuario passar username, se for musica passar nomeMusica, etc) e o nome do que você vai passar
+deleta a tablatura e a musica/artista/usuario que estavam associadas com ela (depende do que foi passado em tipo)

@@ -1,0 +1,62 @@
+
+Pesquisa por nome:
+
+http://localhost:3030/Musicas/:nome_da_musica
+
+GET que pesquisa as informações de uma música pelo nome
+
+retorna um vetor com os parâmetros idMusica, nomeMusica, idArtista, album e anoLancamento ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisar todas as músicas:
+
+http://localhost:3030/Musicas/
+
+GET que pesquisa todas as informações de todas as músicas
+
+retorna um vetor com os parâmetros idMusica, nomeMusica, idArtista, album e anoLancamento de todas as músicas ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Inserir música:
+
+http://localhost:3030/Musicas/
+
+POST que insere no banco de dados
+
+no body.json tem que colocar o nomeMusica, nomeArtista, album e anoLancamento desejado
+
+retorna uma mensagem de criação ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar música por id:
+
+http://localhost:3030/Musicas/id/:idDaMusica
+
+DELETE que deleta no banco de dados a música pelo id dela. Se tiver uma tablatura que referencia ela, a tablatura é deletada também
+
+retorna uma mensagem de sucesso ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar música pelo nome:
+
+http://localhost:3030/Musicas/nome/:nomeDaMusica
+
+DELETE que deleta no banco de dados a música pelo nome dela. Se tiver uma tablatura que referencia a musica, ela é apagada também
+
+retorna uma mensagem de sucesso ou de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualizar uma música pelo id
+
+http://localhost:3030/Musicas/id/:idDaMusica
+
+PUT que atualiza as informações de uma música pelo id dela
+
+no body.json tem que colocar nomeMusica, idArtista, album, anoLancamento que serão atualizados (todos esses parâmetros tem que ser atendidos para que funcione o put)
+
+retorna uma mensagem de criação ou de erro

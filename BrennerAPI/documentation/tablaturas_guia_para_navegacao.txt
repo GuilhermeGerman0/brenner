@@ -1,0 +1,51 @@
+Inserir tablatura:
+
+http://localhost:3030/Tablaturas
+
+POST que insere uma tablatura nova
+
+no body.json tem que colocar o idArtista, idDaMusica, idDoUsuario e conteudo da tablatura (conteudo sendo a string com a tab [não pode colocar na string os seguintes caracteres: ', ", /]) ------- tem que fazer um insert que faz pelos nomes invés dos ids 
+
+retorna uma mensagem de criação ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Pesquisa pelo nome da música:
+
+http://localhost:3030/Tablaturas/:nomeDaMusica 
+
+GET que pesquisa a tablatura de uma música pelo nome dela
+
+retorna conteudo de uma musica ou uma mensagem de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar tablatura pelo id
+
+http://localhost:3030/Tablaturas/id/:idDaTablatura
+
+DELETE que deleta do bd a tablatura pelo id
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Deletar tablatura pelo nome da música
+
+http://localhost:3030/Tablaturas/nome/:nomeDaMusica
+
+DELETE que deleta todas as tablaturas com o nome passado
+
+retorna uma mensagem de sucesso ou uma de erro
+
+-------------------------------------------------------------------------------------------------
+
+Atualizar tablatura pelo id:
+
+http://localhost:3030/Tablaturas/id/:idDaTablatura
+
+PUT que atualiza todas as informações de uma tablatura com base no id dela
+
+no body.json se coloca o idArtista, idArtista, idDoUsuario e conteudo para atualizar (todos os parâmetros precisam estar preenchido para funcionar)
+
+retorna uma mensagem de sucesso ou uma de erro
