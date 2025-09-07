@@ -71,5 +71,23 @@ module.exports = (execQuery) => {
         }
     })
 
+    // Atualizar artista por id
+
+    router.put('/id/:id', async (req, res) => {
+        const id = parseInt(req.params.id)
+        const { nomeArtista, genero } = req.body
+        try {
+            const result = await execQuery(
+                `update brenner.Artistas set nomeArtista = '${nomeArtista}', genero = '${genero}' where idArtista = ${id}`
+            )
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ error: "Artista não encontrado" })
+            }
+            res.sendStatus(200)
+        } catch (error) {
+            return res.status(500).json({ error: "Erro ao atualizar o artista" })
+        }
+    })
+
     return router
 }

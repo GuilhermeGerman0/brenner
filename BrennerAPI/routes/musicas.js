@@ -70,5 +70,23 @@ module.exports = (execQuery) => {
         }
     })
 
+    // Atualizar música por id
+
+    router.put('/id/:id', async (req, res) => {
+        const id = parseInt(req.params.id)
+        const { nomeMusica, idArtista, album, anoLancamento } = req.body
+        try {
+            const result = await execQuery(
+                `update brenner.Musicas set nomeMusica = '${nomeMusica}', idArtista = ${idArtista}, album = '${album}', anoLancamento = ${anoLancamento} where idMusica = ${id}`
+            )
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ error: "Música não encontrada" })
+            }
+            res.sendStatus(200)
+        } catch (error) {
+            return res.status(500).json({ error: "Erro ao atualizar a música" })
+        }
+    })
+
     return router
 }

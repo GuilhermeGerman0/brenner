@@ -56,5 +56,23 @@ module.exports = (execQuery) => {
         }
     })
 
+    // Atualizar tablatura por id
+
+    router.put('/id/:id', async (req, res) => {
+        const id = parseInt(req.params.id)
+        const { idMusica, idArtista, idUsuario, conteudo } = req.body
+        try {
+            const result = await execQuery(
+                `update brenner.Tablaturas set idMusica = ${idMusica}, idArtista = ${idArtista}, idUsuario = ${idUsuario}, conteudo = '${conteudo}' where idTablatura = ${id}`
+            )
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ error: "Tablatura não encontrada" })
+            }
+            res.sendStatus(200)
+        } catch (error) {
+            return res.status(500).json({ error: "Erro ao atualizar a tablatura" })
+        }
+    })
+
     return router
 }

@@ -107,6 +107,24 @@ module.exports = (execQuery) => {
         }
     })
 
+    // Atualizar usuário por id
+
+    router.put('/id/:id', async (req, res) => {
+        const id = parseInt(req.params.id)
+        const { username, email, senha } = req.body
+        try {
+            const result = await execQuery(
+                `update brenner.Usuarios set username = '${username}', email = '${email}', senha = '${senha}' where idUsuario = ${id}`
+            )
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ error: "Usuário não encontrado" })
+            }
+            res.sendStatus(200)
+        } catch (error) {
+            return res.status(500).json({ error: "Erro ao atualizar o usuário" })
+        }
+    })
+
 
     return router
 }
