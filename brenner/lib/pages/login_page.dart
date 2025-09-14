@@ -20,12 +20,12 @@ class BiometricAuth {
 
       final bool didAuthenticate = await auth.authenticate(
         localizedReason: 'Use sua biometria para entrar',
-        options: AuthenticationOptions(biometricOnly: true),
+        options: const AuthenticationOptions(biometricOnly: true),
       );
 
       return didAuthenticate;
     } catch (e) {
-      print("Erro biometria: $e");
+      debugPrint("Erro biometria: $e");
       return false;
     }
   }
@@ -91,37 +91,100 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: usernameController,
-              decoration: InputDecoration(labelText: 'Username ou Email'),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(labelText: 'Senha'),
-            ),
-            SizedBox(height: 16),
-            if (error.isNotEmpty)
-              Text(error, style: TextStyle(color: Colors.red)),
-            SizedBox(height: 16),
-            isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(onPressed: login, child: Text('Login')),
-            TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => SignupScreen()),
+      // remove AppBar, tela inteira
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
               ),
-              child: Text('Criar conta'),
-            )
-          ],
+              elevation: 8,
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_outline,
+                        size: 64, color: Colors.blue.shade700),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Bem-vindo!',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Usuário ou Email',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: const Icon(Icons.lock),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (error.isNotEmpty)
+                      Text(error,
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 14)),
+                    const SizedBox(height: 24),
+                    isLoading
+                        ? const CircularProgressIndicator()
+                        : SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 24),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                backgroundColor: Colors.blue.shade700,
+                              ),
+                              onPressed: login,
+                              child: const Text(
+                                'Entrar',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SignupScreen()),
+                      ),
+                      child: const Text('Criar conta'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
