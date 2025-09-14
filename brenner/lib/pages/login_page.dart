@@ -5,6 +5,11 @@ import 'signup_page.dart';
 import 'home_page.dart';
 import 'package:local_auth/local_auth.dart';
 
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
 class BiometricAuth {
   static final LocalAuthentication auth = LocalAuthentication();
 
@@ -24,11 +29,6 @@ class BiometricAuth {
       return false;
     }
   }
-}
-
-class LoginScreen extends StatefulWidget {
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       setState(() {
-        error = result["message"] ?? "Erro desconhecido";
+        error = result["message"] ?? "Usuário ou senha inválidos";
       });
     }
 
