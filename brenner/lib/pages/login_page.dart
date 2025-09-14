@@ -5,11 +5,6 @@ import 'signup_page.dart';
 import 'home_page.dart';
 import 'package:local_auth/local_auth.dart';
 
-class LoginScreen extends StatefulWidget {
-  @override
-  _LoginScreenState createState() => _LoginScreenState();
-}
-
 class BiometricAuth {
   static final LocalAuthentication auth = LocalAuthentication();
 
@@ -31,41 +26,16 @@ class BiometricAuth {
   }
 }
 
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String error = '';
-
-  void login() async {
-    setState(() {
-      isLoading = true;
-      error = '';
-    });
-
-    final result = await ApiService.login(
-      usernameController.text,
-      passwordController.text,
-    );
-
-    if (result["success"] == true) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('loggedIn', true);
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
-      );
-    } else {
-      setState(() {
-        error = result["message"] ?? "Usuário ou senha inválidos";
-      });
-    }
-
-    setState(() {
-      isLoading = false;
-    });
-  }
 
   @override
   void initState() {
@@ -88,10 +58,39 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void login() async {
+    setState(() {
+      isLoading = true;
+      error = '';
+    });
+
+    final result = await ApiService.login(
+      usernameController.text,
+      passwordController.text,
+    );
+
+    if (result["success"] == true) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('loggedIn', true);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
+    } else {
+      setState(() {
+        error = result["message"] ?? "Erro desconhecido";
+      });
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // remove AppBar, tela inteira
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
