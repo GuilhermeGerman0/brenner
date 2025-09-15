@@ -87,6 +87,19 @@ module.exports = (execQuery) => {
             return res.status(500).json({ error: "Erro ao atualizar a música" })
         }
     })
+    // últimas 5 músicas
+    router.get('/ultimas', async (req, res) => {
+        try {
+            const results = await execQuery(
+            `select top 5 * from brenner.Musicas order by idMusica desc`
+            )
+            res.json(results)
+        }   catch (error) {
+                return res.status(500).json({ error: "Erro ao buscar últimas músicas" })
+        }
+    })
+    
+
 
     return router
 }

@@ -16,13 +16,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLogin() async {
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool loggedIn = prefs.getBool('loggedIn') ?? false;
 
     if (loggedIn) {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => HomeScreen()));
+          context, MaterialPageRoute(builder: (_) => HomePage()));
     } else {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => LoginScreen()));
@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.teal,
       body: Center(
         child: CircularProgressIndicator(color: Colors.white),

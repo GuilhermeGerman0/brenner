@@ -24,8 +24,7 @@ class BiometricAuth {
       );
 
       return didAuthenticate;
-    } catch (e) {
-      debugPrint("Erro biometria: $e");
+    } catch (_) {
       return false;
     }
   }
@@ -52,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (ok) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => HomeScreen()),
+          MaterialPageRoute(builder: (_) => HomePage()),
         );
       }
     }
@@ -75,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomeScreen()),
+        MaterialPageRoute(builder: (_) => HomePage()),
       );
     } else {
       setState(() {

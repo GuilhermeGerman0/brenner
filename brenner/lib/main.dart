@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'pages/splash_screen.dart';
 
 void main() {
-  runApp(BrennerApp());
+  runApp(const BrennerApp());
 }
 
 class BrennerApp extends StatelessWidget {
+  const BrennerApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
