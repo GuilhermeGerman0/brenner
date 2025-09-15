@@ -18,12 +18,20 @@ class _HomeScreenState extends State<HomeScreen> {
         context, MaterialPageRoute(builder: (_) => LoginScreen()));
   }
 
+  void search() async{
+        Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (_) => LoginScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Home'),
         actions: [
+          IconButton(
+            onPressed: search,
+             icon: Icon(Icons.search)),
           IconButton(
               onPressed: logout,
               icon: Icon(Icons.logout))
