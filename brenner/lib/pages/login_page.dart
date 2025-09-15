@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:brenner/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
@@ -44,14 +46,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _checkLogin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool loggedIn = prefs.getBool('loggedIn') ?? false;
 
-    if (loggedIn) {
-      bool ok = await BiometricAuth.authenticate();
-      if (ok) {
+    bool ok = await BiometricAuth.authenticate();
+    if (ok) {
+      // Recupere o user armazenado
+      final userJson = prefs.getString('user');
+      if (userJson != null) {
+        final user = User.fromJson(jsonDecode(userJson));
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => HomePage()),
+          MaterialPageRoute(builder: (_) => HomePage(user: user)),
         );
       }
     }
@@ -72,9 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('loggedIn', true);
 
+      final user = result["user"]; // <-- captura o usuário
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => HomePage()),
+        MaterialPageRoute(builder: (_) => HomePage(user: user)),
       );
     } else {
       setState(() {
@@ -111,14 +118,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.lock_outline,
-                        size: 64, color: Colors.blue.shade700),
+                    Icon(
+                      Icons.lock_outline,
+                      size: 64,
+                      color: Colors.blue.shade700,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Bem-vindo!',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
+                      style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 24),
@@ -146,9 +154,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                     if (error.isNotEmpty)
-                      Text(error,
-                          style:
-                              const TextStyle(color: Colors.red, fontSize: 14)),
+                      Text(
+                        error,
+                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                      ),
                     const SizedBox(height: 24),
                     isLoading
                         ? const CircularProgressIndicator()
@@ -157,7 +166,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 16, horizontal: 24),
+                                  vertical: 16,
+                                  horizontal: 24,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),

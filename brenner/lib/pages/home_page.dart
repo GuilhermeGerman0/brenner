@@ -1,9 +1,15 @@
 import 'dart:convert';
+import '../models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'search_page.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
+  final User user;
+
+  const HomePage({Key? key, required this.user}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -33,13 +39,20 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
   Future<void> _irParaSearch() async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => SearchPage()),
     );
   }
+
+  Future<void> _irParaProfile() async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +61,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Brenner Músicas'),
         actions: [
           IconButton(onPressed: _irParaSearch, icon: const Icon(Icons.search)),
+          IconButton(onPressed: _irParaProfile, icon: const Icon(Icons.person)),
         ],
       ),
       body: RefreshIndicator(
@@ -72,14 +86,18 @@ class _HomePageState extends State<HomePage> {
                     child: ListTile(
                       leading: CircleAvatar(
                         backgroundColor: Colors.blue.shade200,
-                        child: const Icon(Icons.music_note, color: Colors.white),
+                        child: const Icon(
+                          Icons.music_note,
+                          color: Colors.white,
+                        ),
                       ),
                       title: Text(
                         musica['nomeMusica'],
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text(
-                          '${musica['album']} (${musica['anoLancamento']})'),
+                        '${musica['album']} (${musica['anoLancamento']})',
+                      ),
                     ),
                   );
                 },
