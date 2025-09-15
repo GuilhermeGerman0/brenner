@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'add_music_page.dart';
 import 'search_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,15 +33,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _irParaAdd() async {
-    final resultado = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => AddMusicPage()),
-    );
-    if (resultado == true) {
-      _carregarUltimasMusicas();
-    }
-  }
 
   Future<void> _irParaSearch() async {
     await Navigator.push(
@@ -58,7 +48,6 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Brenner Músicas'),
         actions: [
           IconButton(onPressed: _irParaSearch, icon: const Icon(Icons.search)),
-          IconButton(onPressed: _irParaAdd, icon: const Icon(Icons.add)),
         ],
       ),
       body: RefreshIndicator(

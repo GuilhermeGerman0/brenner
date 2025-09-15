@@ -1,22 +1,33 @@
-async function deletarPorId(execQuery, tipo, id) {
-    const tablatura = await execQuery(`select * from brenner.Tablaturas where id${tipo} = ${id}`)
-    if (tablatura.length > 0) {
-        await execQuery(`delete from brenner.Tablaturas where id${tipo} = ${id}`)
+const sql = require('mssql');
+require('dotenv').config();
+
+const config = {
+  connectionString: process.env.CONNECTION_STRING,
+  options: {
+    encrypt: true,
+    trustServerCertificate: true,
+  },
+};
+
+async function execQuery(query, params = {}) {
+  let pool;
+  try {
+    pool = await sql.connect(config);
+    const request = pool.request();
+
+    // Adiciona parâmetros, se existirem
+    for (let key in params) {
+      request.input(key, params[key]);
     }
-    const result = await execQuery(`delete from brenner.${tipo}s where id${tipo} = ${id}`)
-    return result
+
+    const result = await request.query(query);
+    return result.recordset;
+  } catch (error) {
+    console.error('Erro na query:', error);
+    throw error;
+  } finally {
+    if (pool) await pool.close();
+  }
 }
 
-async function deletarPorNome(execQuery, tipo, nomeCampo, nome) {
-    const entidade = await execQuery(`select id${tipo} from brenner.${tipo}s where ${nomeCampo} = '${nome}'`)
-    if (!entidade[0]) return null
-    const id = entidade[0][`id${tipo}`]
-    const tablatura = await execQuery(`select * from brenner.Tablaturas where id${tipo} = ${id}`)
-    if (tablatura.length > 0) {
-        await execQuery(`delete from brenner.Tablaturas where id${tipo} = ${id}`)
-    }
-    const result = await execQuery(`delete from brenner.${tipo}s where id${tipo} = ${id}`)
-    return result
-}
-
-module.exports = { deletarPorId, deletarPorNome }
+module.exports = { execQuery };

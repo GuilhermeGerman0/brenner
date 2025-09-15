@@ -1,86 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'home_page.dart';
+import '../services/spotify_service.dart';
+import '../models/spotify_track.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchPage extends StatefulWidget {
   @override
-  _SearchScreenState createState() => _SearchScreenState();
+  _SearchPageState createState() => _SearchPageState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
-  TextEditingController _searchController = TextEditingController();
-  List<String> _allItems = [
-    "Banana",
-    "Maçã",
-    "Pera",
-    "Abacaxi",
-    "Manga",
-    "Uva",
-  ];
-  List<String> _filteredItems = [];
+class _SearchPageState extends State<SearchPage> {
+  final SpotifyService spotifyService = SpotifyService();
+  final TextEditingController _searchController = TextEditingController();
+  List<SpotifyTrack> resultados = [];
+  bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _filteredItems = _allItems; // inicia mostrando tudo
-  }
+  void search() async {
+    if (_searchController.text.isEmpty) return;
+    setState(() => isLoading = true);
 
-  void _filterSearch(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredItems = _allItems;
-      } else {
-        _filteredItems = _allItems
-            .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
-    });
-  }
+    try {
+      final tracks = await spotifyService.searchTracks(_searchController.text);
+      setState(() => resultados = tracks);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao buscar músicas: $e')),
+      );
+    }
 
-  void _logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('loggedIn', false);
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => HomeScreen()),
-    );
+    setState(() => isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Buscar"),
-        actions: [
-          IconButton(onPressed: _logout, icon: Icon(Icons.logout))
-        ],
-      ),
+      appBar: AppBar(title: Text('Buscar no Spotify')),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(12.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: "Digite para buscar",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: _filterSearch,
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar música ou artista...',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                ElevatedButton(onPressed: search, child: Text('Buscar')),
+              ],
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredItems.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Icon(Icons.label),
-                  title: Text(_filteredItems[index]),
-                );
-              },
-            ),
-          ),
+          isLoading
+              ? CircularProgressIndicator()
+              : Expanded(
+                  child: ListView.builder(
+                    itemCount: resultados.length,
+                    itemBuilder: (context, index) {
+                      final track = resultados[index];
+                      return ListTile(
+                        leading: track.imagemUrl.isNotEmpty
+                            ? Image.network(track.imagemUrl, width: 50, fit: BoxFit.cover)
+                            : Icon(Icons.music_note),
+                        title: Text(track.nome),
+                        subtitle: Text('${track.artista} - ${track.album}'),
+                        onTap: () async {
+                          final url = track.spotifyUrl;
+                          if (await canLaunch(url)) await launch(url);
+                        },
+                      );
+                    },
+                  ),
+                ),
         ],
       ),
     );

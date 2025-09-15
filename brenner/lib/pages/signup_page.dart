@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'package:brenner/models/user.dart';
+import 'profile_page.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -16,31 +17,44 @@ class _SignupScreenState extends State<SignupScreen> {
   String error = '';
 
   void signup() async {
-    setState(() {
-      isLoading = true;
-      error = '';
-    });
+  setState(() {
+    isLoading = true;
+    error = '';
+  });
 
-    final result = await ApiService.signup(
-      User(
-        username: usernameController.text,
-        email: emailController.text,
-        senha: passwordController.text,
+  final result = await ApiService.signup(
+    User(
+      username: usernameController.text,
+      email: emailController.text,
+      senha: passwordController.text,
+    ),
+  );
+
+  if (result["success"] == true) {
+    // Navegar direto para a tela de perfil, passando os dados do usuário
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfileScreen(
+          user: User(
+            username: usernameController.text,
+            email: emailController.text,
+            senha: passwordController.text,
+          ),
+        ),
       ),
     );
-
-    if (result["success"] == true) {
-      Navigator.pop(context); // volta pro login
-    } else {
-      setState(() {
-        error = result["message"] ?? "Erro desconhecido";
-      });
-    }
-
+  } else {
     setState(() {
-      isLoading = false;
+      error = result["message"] ?? "Erro desconhecido";
     });
   }
+
+  setState(() {
+    isLoading = false;
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
