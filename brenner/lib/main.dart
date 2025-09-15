@@ -1,3 +1,4 @@
+import 'package:brenner/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'pages/splash_screen.dart';
 
@@ -14,7 +15,7 @@ class BrennerApp extends StatelessWidget {
       title: 'Brenner App',
       theme: ThemeData(primarySwatch: Colors.teal),
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: LoginScreen(),
     );
   }
 }

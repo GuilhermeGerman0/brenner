@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Recupere o user armazenado
       final userJson = prefs.getString('user');
       if (userJson != null) {
-        final user = User.fromJson(jsonDecode(userJson));
+        User user = User(username: usernameController.text, email: "", senha: passwordController.text);
 
         Navigator.pushReplacement(
           context,
@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('loggedIn', true);
 
-      final user = result["user"]; // <-- captura o usuário
+      User user = User(username: usernameController.text, email: "", senha: passwordController.text); // <-- captura o usuário
 
       Navigator.pushReplacement(
         context,
