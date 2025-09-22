@@ -2,7 +2,6 @@ const express = require('express')
 const router = express.Router()
 const { deletarPorId, deletarPorNome } = require('../services/deletarTablaturaService')
 
-
 module.exports = (execQuery) => {
 
     // Pesquisar todos os usuários

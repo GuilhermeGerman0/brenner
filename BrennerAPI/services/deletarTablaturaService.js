@@ -11,6 +11,7 @@ const config = {
 
 async function execQuery(query, params = {}) {
   let pool;
+  
   try {
     pool = await sql.connect(config);
     const request = pool.request();

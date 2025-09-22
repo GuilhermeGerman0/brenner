@@ -1,9 +1,12 @@
 require("dotenv").config()
+
 const port = process.env.PORT
 const stringSQL = process.env.CONNECTION_STRING
+
 const express = require('express')
 const app = express()
-const mssql = require('mssql')
+
+const pg = require('pg')
 const cors = require('cors')
 const multer = require("multer")
 const path = require("path")
@@ -11,20 +14,18 @@ const path = require("path")
 app.use(express.json())
 app.use(cors())
 
-async function conectaBD(){
-    try {
-        await mssql.connect(stringSQL)
-    } catch (err) {
-        console.log(err)
-    }
-}
-
-conectaBD()
+const pool = new pg.Pool({
+    connectionString: stringSQL
+})
 
 async function execQuery(querySQL) {
-    const request = new mssql.Request()
-    const { recordset } = await request.query(querySQL)
-    return recordset
+    const client = await pool.connect()
+    try {
+        const result = await client.query(querySQL)
+        return result.rows
+    } finally {
+        client.release()
+    }
 }
 
 // Import routers
