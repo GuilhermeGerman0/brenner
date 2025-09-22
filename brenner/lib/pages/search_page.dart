@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/spotify_service.dart';
 import '../models/spotify_track.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'TrackDetailPage.dart'; // <- importe a página de detalhe
 
 class SearchPage extends StatefulWidget {
   @override
@@ -31,6 +32,13 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _abrirSpotify(String url) async {
+    if (url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('URL do Spotify indisponível')),
+      );
+      return;
+    }
+
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -60,6 +68,7 @@ class _SearchPageState extends State<SearchPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    onSubmitted: (_) => search(),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -68,7 +77,10 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
           if (isLoading)
-            const CircularProgressIndicator()
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(),
+            )
           else
             Expanded(
               child: ListView.builder(
@@ -81,9 +93,16 @@ class _SearchPageState extends State<SearchPage> {
                         : const Icon(Icons.music_note),
                     title: Text(track.nome),
                     subtitle: Text('${track.artista} - ${track.album}'),
-                    // usuário clica no tile → abre Spotify também
-                    onTap: () => _abrirSpotify(track.spotifyUrl),
-                    // ícone extra “Clique aqui” para abrir no Spotify
+                    // aqui: ao clicar abre a página de detalhe (com capa em cima e lista embaixo)
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TrackDetailPage(track: track),
+                        ),
+                      );
+                    },
+                    // ícone para abrir no Spotify diretamente
                     trailing: IconButton(
                       icon: const Icon(Icons.open_in_new, color: Colors.green),
                       onPressed: () => _abrirSpotify(track.spotifyUrl),
