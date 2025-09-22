@@ -13,8 +13,25 @@ class BrennerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Brenner App',
-      theme: ThemeData(primarySwatch: Colors.teal),
       debugShowCheckedModeBanner: false,
+
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData.dark().copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          brightness: Brightness.dark,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        scaffoldBackgroundColor: Colors.black,
+      ),
+
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+      ),
+
       home: LoginScreen(),
     );
   }

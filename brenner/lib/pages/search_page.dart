@@ -3,6 +3,8 @@ import '../services/spotify_service.dart';
 import '../models/spotify_track.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'TrackDetailPage.dart'; // <- importe a página de detalhe
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -23,9 +25,9 @@ class _SearchPageState extends State<SearchPage> {
       final tracks = await spotifyService.searchTracks(_searchController.text);
       setState(() => resultados = tracks);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao buscar músicas: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao buscar músicas: $e')));
     }
 
     setState(() => isLoading = false);
@@ -33,9 +35,9 @@ class _SearchPageState extends State<SearchPage> {
 
   Future<void> _abrirSpotify(String url) async {
     if (url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('URL do Spotify indisponível')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('URL do Spotify indisponível')));
       return;
     }
 
@@ -43,10 +45,36 @@ class _SearchPageState extends State<SearchPage> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Não consegui abrir o Spotify')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Não consegui abrir o Spotify')));
     }
+  }
+
+  void _abrirDetalheMusica(SpotifyTrack track) async {
+    // Adiciona ao histórico ao abrir detalhe
+    final prefs = await SharedPreferences.getInstance();
+    final historicoJson = prefs.getStringList('historico_musicas') ?? [];
+    // Remove duplicados
+    final novo = jsonEncode({
+      'name': track.nome,
+      'artists': track.artista.split(',').map((a) => {'name': a}).toList(),
+      'album': {
+        'name': track.album,
+        'images': [
+          {'url': track.imagemUrl},
+        ],
+      },
+      'external_urls': {'spotify': track.spotifyUrl},
+    });
+    historicoJson.removeWhere((e) => e.contains(track.spotifyUrl));
+    historicoJson.insert(0, novo);
+    if (historicoJson.length > 10) historicoJson.removeLast();
+    await prefs.setStringList('historico_musicas', historicoJson);
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TrackDetailPage(track: track)),
+    );
   }
 
   @override
@@ -89,20 +117,15 @@ class _SearchPageState extends State<SearchPage> {
                   final track = resultados[index];
                   return ListTile(
                     leading: track.imagemUrl.isNotEmpty
-                        ? Image.network(track.imagemUrl, width: 50, fit: BoxFit.cover)
+                        ? Image.network(
+                            track.imagemUrl,
+                            width: 50,
+                            fit: BoxFit.cover,
+                          )
                         : const Icon(Icons.music_note),
                     title: Text(track.nome),
                     subtitle: Text('${track.artista} - ${track.album}'),
-                    // aqui: ao clicar abre a página de detalhe (com capa em cima e lista embaixo)
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => TrackDetailPage(track: track),
-                        ),
-                      );
-                    },
-                    // ícone para abrir no Spotify diretamente
+                    onTap: () => _abrirDetalheMusica(track),
                     trailing: IconButton(
                       icon: const Icon(Icons.open_in_new, color: Colors.green),
                       onPressed: () => _abrirSpotify(track.spotifyUrl),
