@@ -30,6 +30,17 @@ class _SearchPageState extends State<SearchPage> {
     setState(() => isLoading = false);
   }
 
+  Future<void> _abrirSpotify(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Não consegui abrir o Spotify')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,36 +56,43 @@ class _SearchPageState extends State<SearchPage> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Buscar música ou artista...',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
-                ElevatedButton(onPressed: search, child: Text('Buscar')),
+                const SizedBox(width: 8),
+                ElevatedButton(onPressed: search, child: const Text('Buscar')),
               ],
             ),
           ),
-          isLoading
-              ? CircularProgressIndicator()
-              : Expanded(
-                  child: ListView.builder(
-                    itemCount: resultados.length,
-                    itemBuilder: (context, index) {
-                      final track = resultados[index];
-                      return ListTile(
-                        leading: track.imagemUrl.isNotEmpty
-                            ? Image.network(track.imagemUrl, width: 50, fit: BoxFit.cover)
-                            : Icon(Icons.music_note),
-                        title: Text(track.nome),
-                        subtitle: Text('${track.artista} - ${track.album}'),
-                        onTap: () async {
-                          final url = track.spotifyUrl;
-                          if (await canLaunch(url)) await launch(url);
-                        },
-                      );
-                    },
-                  ),
-                ),
+          if (isLoading)
+            const CircularProgressIndicator()
+          else
+            Expanded(
+              child: ListView.builder(
+                itemCount: resultados.length,
+                itemBuilder: (context, index) {
+                  final track = resultados[index];
+                  return ListTile(
+                    leading: track.imagemUrl.isNotEmpty
+                        ? Image.network(track.imagemUrl, width: 50, fit: BoxFit.cover)
+                        : const Icon(Icons.music_note),
+                    title: Text(track.nome),
+                    subtitle: Text('${track.artista} - ${track.album}'),
+                    // usuário clica no tile → abre Spotify também
+                    onTap: () => _abrirSpotify(track.spotifyUrl),
+                    // ícone extra “Clique aqui” para abrir no Spotify
+                    trailing: IconButton(
+                      icon: const Icon(Icons.open_in_new, color: Colors.green),
+                      onPressed: () => _abrirSpotify(track.spotifyUrl),
+                      tooltip: 'Abrir no Spotify',
+                    ),
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );
