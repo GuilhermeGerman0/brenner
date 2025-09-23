@@ -1,105 +1,51 @@
-const express = require('express')
-const router = express.Router()
-const { deletarPorId, deletarPorNome } = require('../services/deletarTablaturaService')
+import express from 'express';
+import { execQuery } from '../db/index.js';
+const router = express.Router();
 
-module.exports = (execQuery) => {
-    // Pesquisa por Nome
-    router.get('/:nome', async (req, res) => {
-        const nome = req.params.nome.toLowerCase()
-        try{
-            const results = await execQuery("select * from brenner.Musicas where nomeMusica = '" + nome + "'")
-            res.json(results)
-        }catch(error){
-            return res.status(500).json({error: "Erro ao buscar a música - música não encontrada"})
-        }
-    })
+// últimas 5 músicas
+router.get('/ultimas', async (req, res) => {
+  try {
+    const result = await execQuery(
+      'SELECT * FROM brenner.Musicas ORDER BY idMusica DESC LIMIT 5'
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar últimas músicas' });
+  }
+});
 
-    // Pesquisar todas as músicas
-    router.get('/', async (req, res) => {
-        const results = await execQuery("select * from brenner.Musicas")
-        res.json(results)
-    })
+// inserir música
+router.post('/', async (req, res) => {
+  const { nomeMusica, idArtista, album, anoLancamento } = req.body;
+  try {
+    const result = await execQuery(
+      `INSERT INTO brenner.Musicas (nomeMusica, idArtista, album, anoLancamento)
+       VALUES ($1,$2,$3,$4) RETURNING *`,
+      [nomeMusica, idArtista, album, anoLancamento]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao inserir música' });
+  }
+});
 
-    // Inserir musica
-    router.post('/', async (req, res) => {
-        const nomeMusica = req.body.nomeMusica.toLowerCase()
-        const nomeArtista = req.body.nomeArtista.toLowerCase()
-        try{
-            const resultadoIdArtista = await execQuery(`select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}'`)
-            if(resultadoIdArtista[0] == undefined){
-                return res.status(400).json({error: "Artista não encontrado"})
-            }
-            const idArtista = resultadoIdArtista[0].idArtista
-            const album = req.body.album
-            const anoLancamento = req.body.anoLancamento
-            await execQuery(`insert into brenner.Musicas values ('${nomeMusica}', ${idArtista}, '${album}', ${anoLancamento})`)
-            res.sendStatus(201)
-
-        }catch(error){
-            return res.status(500).json({error: "Erro ao inserir a música"})
-        }
-    })
-
-    // Deletar musica por id
-
-    router.delete('/id/:id', async (req, res) => {
-        const id = parseInt(req.params.id)
-        try {
-            const result = await deletarPorId(execQuery, 'Musica', id)
-            if (result.rowsAffected[0] === 0) {
-                return res.status(404).json({ error: "Música não encontrada" })
-            }
-            res.sendStatus(200)
-        } catch (error) {
-            return res.status(500).json({ error: "Erro ao deletar a música" })
-        }
-    })
-
-    // Deletar musica por nome
-
-    router.delete('/nome/:nome', async (req, res) => {
-        const nome = req.params.nome.toLowerCase()
-        try {
-            const result = await deletarPorNome(execQuery, 'Musica', 'nomeMusica', nome)
-            if (!result || result.rowsAffected[0] === 0) {
-                return res.status(404).json({ error: "Música não encontrada" })
-            }
-            res.sendStatus(200)
-        } catch (error) {
-            return res.status(500).json({ error: "Erro ao deletar a música" })
-        }
-    })
-
-    // Atualizar música por id
-
-    router.put('/id/:id', async (req, res) => {
-        const id = parseInt(req.params.id)
-        const { nomeMusica, idArtista, album, anoLancamento } = req.body
-        try {
-            const result = await execQuery(
-                `update brenner.Musicas set nomeMusica = '${nomeMusica}', idArtista = ${idArtista}, album = '${album}', anoLancamento = ${anoLancamento} where idMusica = ${id}`
-            )
-            if (result.rowsAffected[0] === 0) {
-                return res.status(404).json({ error: "Música não encontrada" })
-            }
-            res.sendStatus(200)
-        } catch (error) {
-            return res.status(500).json({ error: "Erro ao atualizar a música" })
-        }
-    })
-    // últimas 5 músicas
-    router.get('/ultimas', async (req, res) => {
-        try {
-            const results = await execQuery(
-            `select top 5 * from brenner.Musicas order by idMusica desc`
-            )
-            res.json(results)
-        }   catch (error) {
-                return res.status(500).json({ error: "Erro ao buscar últimas músicas" })
-        }
-    })
-    
-
-
-    return router
-}
+export default router;
+// atualizar música
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;      
+    const { nomeMusica, idArtista, album, anoLancamento } = req.body;      
+    try {
+        const result = await execQuery(
+            `UPDATE brenner.Musicas 
+             SET nomeMusica=$1, idArtista=$2, album=$3, anoLancamento=$4 
+             WHERE idMusica=$5`,    
+            [nomeMusica, idArtista, album, anoLancamento, id]
+        );  
+        if (result.rowCount === 0) {      
+            return res.status(404).json({ error: 'Música não encontrada' });      
+        }   
+        res.sendStatus(204);
+    } catch (err) {      
+        res.status(500).json({ error: 'Erro ao atualizar música' });      
+    }   
+});

@@ -6,9 +6,9 @@ import '../models/user.dart';
 
 class ApiService {
   static String get baseUrl {
-    if (kIsWeb) return "http://localhost:3030";
-    if (Platform.isAndroid) return "http://10.0.2.2:3030";
-    return "http://192.168.0.160:3030";
+    if (kIsWeb) return "https://brenner.onrender.com";
+    if (Platform.isAndroid) return "https://brenner.onrender.com";
+    return "https://brenner.onrender.com";
   }
 
   // LOGIN
