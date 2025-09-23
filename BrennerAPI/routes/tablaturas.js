@@ -1,8 +1,6 @@
-const express = require('express');
-
-module.exports = (execQuery) => {
-  const router = express.Router();
-
+import express from 'express';
+import { execQuery } from '../index.js'; // caminho relativo correto
+const router = express.Router();
   router.get('/', async (req, res) => {
     try {
       const result = await execQuery('SELECT * FROM brenner.Tablaturas');
@@ -12,5 +10,4 @@ module.exports = (execQuery) => {
     }
   });
 
-  return router;
-};
+  export default router;
