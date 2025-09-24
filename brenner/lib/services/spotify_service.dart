@@ -1,7 +1,7 @@
 // lib/services/spotify_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart'; 
 import '../models/spotify_track.dart';
 import 'package:flutter/foundation.dart';
 
@@ -128,7 +128,7 @@ class SpotifyService {
   Future<void> authenticateUser() async {
     final authUrl =
         'https://accounts.spotify.com/authorize?response_type=token&client_id=$clientId&redirect_uri=$redirectUri&scope=${scopes.join('%20')}';
-    final result = await FlutterWebAuth.authenticate(
+    final result = await FlutterWebAuth2.authenticate(
       url: authUrl,
       callbackUrlScheme: 'brenner',
     );

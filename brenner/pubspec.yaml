@@ -12,12 +12,11 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.1.0
-  flutter_web_auth_2: ^3.1.2
-  flutter_web_auth: ^0.5.0
+  flutter_web_auth_2: 5.0.0-alpha.4 
   local_auth: ^2.1.7
   http: ^1.1.0
   url_launcher: ^6.1.10
-  oauth2_client: ^3.2.2
+  oauth2_client: ^4.2.0
 
 dev_dependencies:
   flutter_test:

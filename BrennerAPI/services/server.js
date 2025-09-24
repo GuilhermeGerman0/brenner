@@ -4,6 +4,7 @@ import usuariosRouter from './routes/usuarios.js';
 import artistasRouter from './routes/artistas.js';
 import musicasRouter from './routes/musicas.js';
 import tablaturasRouter from './routes/tablaturas.js';
+import 'dotenv/config';
 
 const app = express();
 app.use(cors());

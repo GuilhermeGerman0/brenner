@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:html' as html;
+import 'package:brenner/services/url_helper.dart'; // Ajuste o caminho se necessário
 import 'package:oauth2_client/oauth2_client.dart';
 import 'package:oauth2_client/spotify_oauth2_client.dart';
 import '../models/user.dart';
@@ -62,13 +62,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     try {
       String redirectUri;
-      if (kIsWeb) {
-        final host = html.window.location.hostname;
-        final port = html.window.location.port;
-        redirectUri = 'http://$host:$port/callback';
-      } else {
-        redirectUri = 'brenner://callback';
-      }
+    if (kIsWeb) {
+      final urlHelper = UrlHelper(); // <-- Crie o ajudante
+      final host = urlHelper.getHost(); // <-- Use o ajudante
+      final port = urlHelper.getPort(); // <-- Use o ajudante
+      redirectUri = 'http://$host:$port/callback';
+    } else {
+      redirectUri = 'brenner://callback';
+    }
       final client = SpotifyOAuth2Client(
         redirectUri: redirectUri,
         customUriScheme: 'brenner',
@@ -103,11 +104,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (kIsWeb) {
-      final hash = html.window.location.hash;
-      if (hash.contains('access_token=')) {
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  if (kIsWeb) {
+    final urlHelper = UrlHelper(); // <-- Crie o ajudante
+    final hash = urlHelper.getHash(); // <-- Use o ajudante
+    if (hash.contains('access_token=')) {
         final token = hash
             .replaceFirst('#', '')
             .split('&')

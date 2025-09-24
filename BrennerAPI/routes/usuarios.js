@@ -2,12 +2,12 @@ import express from 'express';
 import { execQuery } from '../db/index.js';
 const router = express.Router();
 
-// listar
 router.get('/', async (req, res) => {
   try {
     const result = await execQuery('SELECT * FROM brenner.Usuarios');
     res.json(result.rows);
   } catch (err) {
+    console.error("ERRO DETALHADO AO BUSCAR USUÁRIOS:", err); 
     res.status(500).json({ error: 'Erro ao buscar usuários' });
   }
 });
