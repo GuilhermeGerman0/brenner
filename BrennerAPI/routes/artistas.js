@@ -1,9 +1,7 @@
-const express = require('express')
-const router = express.Router()
-const { deletarPorId, deletarPorNome } = require('../services/deletarTablaturaService')
+import express from 'express';
+import { execQuery } from '../index.js'; // caminho relativo correto
+const router = express.Router();
 
-
-module.exports = (execQuery) => {
 
     // Pesquisar todos os artistas
 
@@ -89,5 +87,5 @@ module.exports = (execQuery) => {
         }
     })
 
-    return router
-}
+    export default router;
+

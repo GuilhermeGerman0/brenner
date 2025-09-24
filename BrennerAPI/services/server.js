@@ -16,4 +16,10 @@ app.use('/musicas', musicasRouter);
 app.use('/tablaturas', tablaturasRouter);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
+app.get('/', (req, res) => {
+    res.send('Brenner API está funcionando!');
+  });
+  
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
+});

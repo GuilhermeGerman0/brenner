@@ -1,8 +1,8 @@
 import express from 'express';
-import { execQuery } from '../db/index.js';
+import { execQuery } from '../index.js';
 const router = express.Router();
 
-// últimas 5 músicas
+// listar últimas 5 músicas
 router.get('/ultimas', async (req, res) => {
   try {
     const result = await execQuery(
@@ -29,23 +29,24 @@ router.post('/', async (req, res) => {
   }
 });
 
-export default router;
 // atualizar música
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;      
-    const { nomeMusica, idArtista, album, anoLancamento } = req.body;      
-    try {
-        const result = await execQuery(
-            `UPDATE brenner.Musicas 
-             SET nomeMusica=$1, idArtista=$2, album=$3, anoLancamento=$4 
-             WHERE idMusica=$5`,    
-            [nomeMusica, idArtista, album, anoLancamento, id]
-        );  
-        if (result.rowCount === 0) {      
-            return res.status(404).json({ error: 'Música não encontrada' });      
-        }   
-        res.sendStatus(204);
-    } catch (err) {      
-        res.status(500).json({ error: 'Erro ao atualizar música' });      
-    }   
+  const { id } = req.params;
+  const { nomeMusica, idArtista, album, anoLancamento } = req.body;
+  try {
+    const result = await execQuery(
+      `UPDATE brenner.Musicas 
+       SET nomeMusica=$1, idArtista=$2, album=$3, anoLancamento=$4 
+       WHERE idMusica=$5`,
+      [nomeMusica, idArtista, album, anoLancamento, id]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Música não encontrada' });
+    }
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar música' });
+  }
 });
+
+export default router;

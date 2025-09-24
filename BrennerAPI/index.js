@@ -1,4 +1,6 @@
 import pg from 'pg';
+import './services/server.js';
+
 const { Pool } = pg;
 
 const pool = new Pool({
