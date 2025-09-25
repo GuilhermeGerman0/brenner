@@ -20,7 +20,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<dynamic> ultimasMusicas = [];
   List<SpotifyTrack> historicoMusicas = [];
-  String? erroUltimasMusicas;
 
   @override
   void initState() {
@@ -30,11 +29,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _carregarUltimasMusicas() async {
-    setState(() {
-      erroUltimasMusicas = null;
-    });
     try {
-      // Use o IP correto para mobile, se necessário
       final url = Uri.parse('http://localhost:3030/musicas/ultimas');
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -42,14 +37,10 @@ class _HomePageState extends State<HomePage> {
           ultimasMusicas = jsonDecode(response.body);
         });
       } else {
-        setState(() {
-          erroUltimasMusicas = 'Erro ao buscar músicas: ${response.body}';
-        });
+        print('Erro: ${response.body}');
       }
     } catch (e) {
-      setState(() {
-        erroUltimasMusicas = 'Erro de conexão: $e';
-      });
+      print('Erro: $e');
     }
   }
 
@@ -245,25 +236,8 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            if (erroUltimasMusicas != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  erroUltimasMusicas!,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            else if (ultimasMusicas.isEmpty)
-              const Center(
-                child: Text(
-                  'Nenhuma música encontrada.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              )
+            if (ultimasMusicas.isEmpty)
+              const Center(child: CircularProgressIndicator())
             else
               ...ultimasMusicas.map((musica) {
                 final track = SpotifyTrack(
