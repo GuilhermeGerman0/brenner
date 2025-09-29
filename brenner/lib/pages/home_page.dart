@@ -1,16 +1,16 @@
 import 'dart:convert';
-import '../models/user.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user.dart';
+import '../models/spotify_track.dart';
+import '../services/spotify_service.dart';
+import 'TrackDetailPage.dart';
 import 'search_page.dart';
 import 'profile_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/spotify_track.dart';
-import 'TrackDetailPage.dart';
+import 'salvas_screen.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
-
   const HomePage({Key? key, required this.user}) : super(key: key);
 
   @override
@@ -18,8 +18,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<dynamic> ultimasMusicas = [];
+  List<SpotifyTrack> ultimasMusicas = [];
   List<SpotifyTrack> historicoMusicas = [];
+
+  final SpotifyService _spotifyService = SpotifyService();
 
   @override
   void initState() {
@@ -32,20 +34,21 @@ class _HomePageState extends State<HomePage> {
     await _carregarHistorico();
   }
 
+  // ======================================
+  // Músicas mais ouvidas do momento
+  // ======================================
   Future<void> _carregarUltimasMusicas() async {
     try {
-      final url = Uri.parse('http://localhost:3030/musicas/ultimas');
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        setState(() => ultimasMusicas = jsonDecode(response.body));
-      } else {
-        debugPrint('Erro: ${response.body}');
-      }
+      final topTracks = await _spotifyService.searchTracks('top', limit: 10);
+      setState(() => ultimasMusicas = topTracks);
     } catch (e) {
-      debugPrint('Erro: $e');
+      debugPrint('Erro ao carregar top tracks: $e');
     }
   }
 
+  // ======================================
+  // Histórico
+  // ======================================
   Future<void> _carregarHistorico() async {
     final prefs = await SharedPreferences.getInstance();
     final historicoJson = prefs.getStringList('historico_musicas') ?? [];
@@ -64,20 +67,7 @@ class _HomePageState extends State<HomePage> {
     if (historicoMusicas.length > 10) {
       historicoMusicas = historicoMusicas.sublist(0, 10);
     }
-    final historicoJson = historicoMusicas
-        .map((t) => jsonEncode({
-              'name': t.nome,
-              'artists':
-                  t.artista.split(',').map((a) => {'name': a}).toList(),
-              'album': {
-                'name': t.album,
-                'images': [
-                  {'url': t.imagemUrl},
-                ],
-              },
-              'external_urls': {'spotify': t.spotifyUrl},
-            }))
-        .toList();
+    final historicoJson = historicoMusicas.map((t) => jsonEncode(t.toJson())).toList();
     await prefs.setStringList('historico_musicas', historicoJson);
     setState(() {});
   }
@@ -91,37 +81,72 @@ class _HomePageState extends State<HomePage> {
     _carregarHistorico();
   }
 
-  void _irParaSearch() {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => SearchPage()));
-  }
+  void _irParaSearch() => Navigator.push(context, MaterialPageRoute(builder: (_) => SearchPage()));
 
-  void _irParaProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)),
-    );
-  }
+  void _irParaProfile() => Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)));
+
+  void _irParaSalvas() => Navigator.push(context, MaterialPageRoute(builder: (_) => const SalvasScreen()));
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      drawer: Drawer(
+        backgroundColor: Colors.grey[900],
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(widget.user.username),
+              accountEmail: Text(widget.user.email),
+              currentAccountPicture: const CircleAvatar(
+                backgroundColor: Colors.white24,
+                child: Icon(Icons.person, color: Colors.white),
+              ),
+              decoration: const BoxDecoration(color: Colors.black),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home, color: Colors.white),
+              title: const Text('Home', style: TextStyle(color: Colors.white)),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person, color: Colors.white),
+              title: const Text('Perfil', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _irParaProfile();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.save, color: Colors.white),
+              title: const Text('Salvas', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _irParaSalvas();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.search, color: Colors.white),
+              title: const Text('Buscar', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                _irParaSearch();
+              },
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.black,
         title: const Text('Brenner Músicas'),
-        actions: [
-          IconButton(
-            onPressed: _irParaSearch,
-            icon: const Icon(Icons.search),
-            tooltip: 'Buscar',
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
-          IconButton(
-            onPressed: _irParaProfile,
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Perfil',
-          ),
-        ],
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: _carregarDados,
@@ -131,34 +156,6 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cabeçalho do usuário
-              Card(
-                color: Colors.grey[900],
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Colors.blueAccent,
-                    child: const Icon(Icons.person, size: 32),
-                  ),
-                  title: Text(
-                    widget.user.username,
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  subtitle: Text(widget.user.email,
-                      style: const TextStyle(color: Colors.grey)),
-                  trailing: TextButton(
-                    onPressed: _irParaProfile,
-                    child: const Text('Ver Perfil'),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
               // Histórico
               if (historicoMusicas.isNotEmpty) ...[
                 const Text(
@@ -229,9 +226,9 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 24),
               ],
 
-              // Últimas músicas
+              // Músicas mais ouvidas do momento
               const Text(
-                'Últimas músicas adicionadas',
+                'Músicas mais ouvidas do momento',
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -240,29 +237,34 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 12),
               if (ultimasMusicas.isEmpty)
                 const Center(
-                    child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: CircularProgressIndicator(),
-                ))
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               else
                 Column(
-                  children: ultimasMusicas.map((musica) {
-                    final track = SpotifyTrack(
-                      nome: musica['nomeMusica'] ?? '',
-                      artista: musica['nomeArtista'] ?? '',
-                      album: musica['album'] ?? '',
-                      imagemUrl: '',
-                      spotifyUrl: '',
-                    );
+                  children: ultimasMusicas.map((track) {
                     return Card(
                       color: Colors.grey[900],
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          child: Icon(Icons.music_note, color: Colors.white),
-                        ),
+                        leading: track.imagemUrl.isNotEmpty
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  track.imagemUrl,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const CircleAvatar(
+                                backgroundColor: Colors.blue,
+                                child: Icon(Icons.music_note,
+                                    color: Colors.white),
+                              ),
                         title: Text(track.nome,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,

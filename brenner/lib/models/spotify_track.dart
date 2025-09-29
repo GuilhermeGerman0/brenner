@@ -6,8 +6,8 @@ class SpotifyTrack extends Equatable {
   final String album;
   final String imagemUrl;
   final String spotifyUrl;
-  final String ano;      // <── novo
-  final String genero;   // <── novo
+  final String ano;
+  final String genero;
 
   const SpotifyTrack({
     required this.nome,
@@ -28,17 +28,13 @@ class SpotifyTrack extends Equatable {
 
     final albumInfo = json['album'] as Map<String, dynamic>?;
 
-    final imageUrl = (albumInfo?['images'] as List<dynamic>?)
-            ?.isNotEmpty == true
+    final imageUrl = (albumInfo?['images'] as List<dynamic>? ?? []).isNotEmpty
         ? (albumInfo?['images'] as List).first['url'] as String
         : '';
 
-    // Ano do lançamento: vem do campo release_date do album
     final releaseDate = albumInfo?['release_date'] as String? ?? '';
     final ano = releaseDate.isNotEmpty ? releaseDate.substring(0, 4) : '';
 
-    // Gênero: a API de track não retorna gênero, você teria que pegar do artist endpoint.
-    // Aqui é só placeholder:
     final genero = (json['genero'] as String?) ?? '';
 
     return SpotifyTrack(
@@ -52,25 +48,6 @@ class SpotifyTrack extends Equatable {
     );
   }
 
-  SpotifyTrack copyWith({
-    String? nome,
-    String? artista,
-    String? album,
-    String? imagemUrl,
-    String? spotifyUrl,
-    String? ano,
-    String? genero,
-  }) =>
-      SpotifyTrack(
-        nome: nome ?? this.nome,
-        artista: artista ?? this.artista,
-        album: album ?? this.album,
-        imagemUrl: imagemUrl ?? this.imagemUrl,
-        spotifyUrl: spotifyUrl ?? this.spotifyUrl,
-        ano: ano ?? this.ano,
-        genero: genero ?? this.genero,
-      );
-
   Map<String, dynamic> toJson() => {
         'name': nome,
         'artists': artista.split(', '),
@@ -82,6 +59,5 @@ class SpotifyTrack extends Equatable {
       };
 
   @override
-  List<Object?> get props =>
-      [nome, artista, album, imagemUrl, spotifyUrl, ano, genero];
+  List<Object?> get props => [nome, artista, album, imagemUrl, spotifyUrl, ano, genero];
 }

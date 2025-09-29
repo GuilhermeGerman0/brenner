@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/spotify_track.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../services/music_repository.dart'; // importa o repositório
 
 class TrackDetailPage extends StatelessWidget {
   final SpotifyTrack track;
@@ -26,7 +27,6 @@ class TrackDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // placeholder de tablaturas — substitua pela sua fonte/API depois
     final List<String> tablaturas =
         List.generate(8, (i) => 'Tablatura exemplo ${i + 1}');
 
@@ -39,7 +39,6 @@ class TrackDetailPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // capa do álbum
           if (track.imagemUrl.isNotEmpty)
             ClipRRect(
               borderRadius: const BorderRadius.only(
@@ -56,7 +55,6 @@ class TrackDetailPage extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Info principal
                 Text(
                   track.nome,
                   textAlign: TextAlign.center,
@@ -71,26 +69,12 @@ class TrackDetailPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16, color: Colors.grey),
                 ),
-                if (track.ano.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Ano de lançamento: ${track.ano}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-                if (track.genero.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Gênero: ${track.genero}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
                 const SizedBox(height: 12),
                 // Botões
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
                   children: [
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -101,17 +85,31 @@ class TrackDetailPage extends StatelessWidget {
                       label: const Text('Ouvir no Spotify'),
                       onPressed: () => _abrirSpotify(context, track.spotifyUrl),
                     ),
-                    const SizedBox(width: 12),
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Colors.white24),
                       ),
-                      icon: const Icon(Icons.star_border),
+                      icon: const Icon(Icons.favorite_border),
+                      label: const Text('Favoritar'),
+                      onPressed: () {
+                        MusicRepository.addFavorita(track);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Adicionado aos favoritos!')),
+                        );
+                      },
+                    ),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white24),
+                      ),
+                      icon: const Icon(Icons.save_alt),
                       label: const Text('Salvar'),
                       onPressed: () {
+                        MusicRepository.addSalva(track);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Salvo (placeholder)')),
+                          const SnackBar(content: Text('Música salva!')),
                         );
                       },
                     ),
@@ -126,7 +124,6 @@ class TrackDetailPage extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white)),
                 const SizedBox(height: 8),
-                // Lista de tablaturas
                 ...tablaturas.map((tab) => Card(
                       color: Colors.grey[900],
                       shape: RoundedRectangleBorder(
@@ -140,8 +137,7 @@ class TrackDetailPage extends StatelessWidget {
                             style: TextStyle(color: Colors.grey)),
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text('Abrir tablatura: $tab (placeholder)')),
+                            SnackBar(content: Text('Abrir tablatura: $tab')),
                           );
                         },
                       ),
