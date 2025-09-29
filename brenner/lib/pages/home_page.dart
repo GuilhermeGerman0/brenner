@@ -14,7 +14,7 @@ class HomePage extends StatefulWidget {
   const HomePage({Key? key, required this.user}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -24,8 +24,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _carregarUltimasMusicas();
-    _carregarHistorico();
+    _carregarDados();
+  }
+
+  Future<void> _carregarDados() async {
+    await _carregarUltimasMusicas();
+    await _carregarHistorico();
   }
 
   Future<void> _carregarUltimasMusicas() async {
@@ -33,14 +37,12 @@ class _HomePageState extends State<HomePage> {
       final url = Uri.parse('http://localhost:3030/musicas/ultimas');
       final response = await http.get(url);
       if (response.statusCode == 200) {
-        setState(() {
-          ultimasMusicas = jsonDecode(response.body);
-        });
+        setState(() => ultimasMusicas = jsonDecode(response.body));
       } else {
-        print('Erro: ${response.body}');
+        debugPrint('Erro: ${response.body}');
       }
     } catch (e) {
-      print('Erro: $e');
+      debugPrint('Erro: $e');
     }
   }
 
@@ -49,10 +51,8 @@ class _HomePageState extends State<HomePage> {
     final historicoJson = prefs.getStringList('historico_musicas') ?? [];
     setState(() {
       historicoMusicas = historicoJson
-          .map(
-            (e) =>
-                SpotifyTrack.fromJson(Map<String, dynamic>.from(jsonDecode(e))),
-          )
+          .map((e) =>
+              SpotifyTrack.fromJson(Map<String, dynamic>.from(jsonDecode(e))))
           .toList();
     });
   }
@@ -61,48 +61,25 @@ class _HomePageState extends State<HomePage> {
     final prefs = await SharedPreferences.getInstance();
     historicoMusicas.removeWhere((t) => t.spotifyUrl == track.spotifyUrl);
     historicoMusicas.insert(0, track);
-    if (historicoMusicas.length > 10)
+    if (historicoMusicas.length > 10) {
       historicoMusicas = historicoMusicas.sublist(0, 10);
+    }
     final historicoJson = historicoMusicas
-        .map(
-          (t) => jsonEncode({
-            'name': t.nome,
-            'artists': t.artista.split(',').map((a) => {'name': a}).toList(),
-            'album': {
-              'name': t.album,
-              'images': [
-                {'url': t.imagemUrl},
-              ],
-            },
-            'external_urls': {'spotify': t.spotifyUrl},
-          }),
-        )
+        .map((t) => jsonEncode({
+              'name': t.nome,
+              'artists':
+                  t.artista.split(',').map((a) => {'name': a}).toList(),
+              'album': {
+                'name': t.album,
+                'images': [
+                  {'url': t.imagemUrl},
+                ],
+              },
+              'external_urls': {'spotify': t.spotifyUrl},
+            }))
         .toList();
     await prefs.setStringList('historico_musicas', historicoJson);
     setState(() {});
-  }
-
-  Future<void> _irParaSearch() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => SearchPage()),
-    );
-  }
-
-  Future<void> _irParaProfile() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)),
-    );
-  }
-
-  void _irParaAdicionarMusica() {
-    // TODO: implementar tela de adicionar música
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade de adicionar música em breve!'),
-      ),
-    );
   }
 
   void _abrirDetalheMusica(SpotifyTrack track) async {
@@ -114,159 +91,191 @@ class _HomePageState extends State<HomePage> {
     _carregarHistorico();
   }
 
+  void _irParaSearch() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => SearchPage()));
+  }
+
+  void _irParaProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.black,
         title: const Text('Brenner Músicas'),
         actions: [
-          IconButton(onPressed: _irParaSearch, icon: const Icon(Icons.search)),
-          IconButton(onPressed: _irParaProfile, icon: const Icon(Icons.person)),
+          IconButton(
+            onPressed: _irParaSearch,
+            icon: const Icon(Icons.search),
+            tooltip: 'Buscar',
+          ),
+          IconButton(
+            onPressed: _irParaProfile,
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Perfil',
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _irParaAdicionarMusica,
-        icon: const Icon(Icons.add),
-        label: const Text('Adicionar Música'),
-      ),
       body: RefreshIndicator(
-        onRefresh: () async {
-          await _carregarUltimasMusicas();
-          await _carregarHistorico();
-        },
-        child: ListView(
+        onRefresh: _carregarDados,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
-          children: [
-            // Cabeçalho do usuário
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  child: const Icon(Icons.person, size: 32),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.user.username,
-                      style: const TextStyle(
-                        fontSize: 20,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cabeçalho do usuário
+              Card(
+                color: Colors.grey[900],
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.blueAccent,
+                    child: const Icon(Icons.person, size: 32),
+                  ),
+                  title: Text(
+                    widget.user.username,
+                    style: const TextStyle(
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      widget.user.email,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Histórico de músicas
-            if (historicoMusicas.isNotEmpty) ...[
-              const Text(
-                'Músicas visitadas recentemente',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 120,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: historicoMusicas.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final track = historicoMusicas[index];
-                    return GestureDetector(
-                      onTap: () => _abrirDetalheMusica(track),
-                      child: Container(
-                        width: 110,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[900],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (track.imagemUrl.isNotEmpty)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  track.imagemUrl,
-                                  width: 80,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            else
-                              const Icon(Icons.music_note, size: 40),
-                            const SizedBox(height: 6),
-                            Text(
-                              track.nome,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            Text(
-                              track.artista,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                        color: Colors.white),
+                  ),
+                  subtitle: Text(widget.user.email,
+                      style: const TextStyle(color: Colors.grey)),
+                  trailing: TextButton(
+                    onPressed: _irParaProfile,
+                    child: const Text('Ver Perfil'),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
+
+              // Histórico
+              if (historicoMusicas.isNotEmpty) ...[
+                const Text(
+                  'Músicas visitadas recentemente',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 150,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: historicoMusicas.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final track = historicoMusicas[index];
+                      return GestureDetector(
+                        onTap: () => _abrirDetalheMusica(track),
+                        child: Container(
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[850],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 8),
+                              if (track.imagemUrl.isNotEmpty)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    track.imagemUrl,
+                                    width: 100,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              else
+                                const Icon(Icons.music_note,
+                                    size: 60, color: Colors.white),
+                              const SizedBox(height: 6),
+                              Text(
+                                track.nome,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Colors.white),
+                              ),
+                              Text(
+                                track.artista,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+
+              // Últimas músicas
+              const Text(
+                'Últimas músicas adicionadas',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+              const SizedBox(height: 12),
+              if (ultimasMusicas.isEmpty)
+                const Center(
+                    child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ))
+              else
+                Column(
+                  children: ultimasMusicas.map((musica) {
+                    final track = SpotifyTrack(
+                      nome: musica['nomeMusica'] ?? '',
+                      artista: musica['nomeArtista'] ?? '',
+                      album: musica['album'] ?? '',
+                      imagemUrl: '',
+                      spotifyUrl: '',
+                    );
+                    return Card(
+                      color: Colors.grey[900],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                        leading: const CircleAvatar(
+                          backgroundColor: Colors.blue,
+                          child: Icon(Icons.music_note, color: Colors.white),
+                        ),
+                        title: Text(track.nome,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white)),
+                        subtitle: Text('${track.artista} • ${track.album}',
+                            style: const TextStyle(color: Colors.grey)),
+                        onTap: () => _abrirDetalheMusica(track),
+                      ),
+                    );
+                  }).toList(),
+                ),
             ],
-            // Últimas músicas do backend
-            const Text(
-              'Últimas músicas adicionadas',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            if (ultimasMusicas.isEmpty)
-              const Center(child: CircularProgressIndicator())
-            else
-              ...ultimasMusicas.map((musica) {
-                final track = SpotifyTrack(
-                  nome: musica['nomeMusica'] ?? '',
-                  artista: musica['nomeArtista'] ?? '',
-                  album: musica['album'] ?? '',
-                  imagemUrl: '',
-                  spotifyUrl: '',
-                );
-                return Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    leading: const CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      child: Icon(Icons.music_note, color: Colors.white),
-                    ),
-                    title: Text(
-                      track.nome,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text('${track.artista} • ${track.album}'),
-                    onTap: () => _abrirDetalheMusica(track),
-                  ),
-                );
-              }).toList(),
-          ],
+          ),
         ),
       ),
     );

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
+import '../services/spotify_service.dart';
+import '../models/spotify_track.dart';  
 
 class ApiService {
   static String get baseUrl {
