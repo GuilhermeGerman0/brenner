@@ -3,10 +3,10 @@ import express from 'express';
 import cors from 'cors';
 
 // Importa os roteadores
-import usuariosRouter from '../routes/usuarios.js';
-import artistasRouter from '../routes/artistas.js';
-import musicasRouter from '../routes/musicas.js';
-import tablaturasRouter from '../routes/tablaturas.js';
+import usuariosRouter from '../src/routes/usuarios.js';
+import artistasRouter from '../src/routes/artistas.js';
+import musicasRouter from '../src/routes/musicas.js';
+import tablaturasRouter from '../src/routes/tablaturas.js';
 
 const app = express();
 

@@ -1,5 +1,5 @@
 import express from 'express';
-import { execQuery } from '../index.js';
+import { execQuery } from '../../index.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
