@@ -14,6 +14,21 @@ module.exports = (execQuery) => {
         res.sendStatus(201)
     })
 
+    // Pesquisar por nome e artista e pegar o username do usuário que postou
+
+    router.get('/:nomeMusica/:nomeArtista', async (req, res) => {
+        const nomeMusica = req.params.nomeMusica.toLowerCase()
+        const nomeArtista = req.params.nomeArtista.toLowerCase()
+        try{
+            const results = await execQuery(`select t.conteudo, u.username from brenner.Tablaturas t join brenner.Usuarios u on t.idUsuario = u.idUsuario where t.idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}') and t.idArtista = (select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}')`)
+            res.json(results)
+        }catch(error){
+            return res.status(500).json({error: "Erro ao buscar a tablatura - tablatura para essa música e artista não encontrada"})
+        }
+    })
+
+    
+
     // Pesquisa por nome da música
 
     router.get('/:nomeMusica', async (req, res) => {

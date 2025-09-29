@@ -14,6 +14,18 @@ module.exports = (execQuery) => {
         }
     })
 
+    // Pesquisar por Artista
+
+    router.get('/artista/:nomeArtista', async (req, res) => {
+        const nomeArtista = req.params.nomeArtista.toLowerCase()
+        try{
+            const results = await execQuery(`select * from brenner.Musicas where idArtista = (select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}')`)
+            res.json(results)
+        }catch(error){
+            return res.status(500).json({error: "Erro ao buscar a música - artista não encontrado"})
+        }
+    })
+
     // Pesquisar todas as músicas
     router.get('/', async (req, res) => {
         const results = await execQuery("select * from brenner.Musicas")
