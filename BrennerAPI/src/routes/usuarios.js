@@ -2,58 +2,62 @@ import express from 'express';
 import { execQuery } from '../index.js';
 const router = express.Router();
 
+// GET: Buscar todos os usuários
 router.get('/', async (req, res) => {
   try {
-    const result = await execQuery('SELECT * FROM brenner.Usuarios');
+    const result = await execQuery('SELECT id_usuario, username, email FROM brenner.usuarios');
     res.json(result.rows);
   } catch (err) {
-    console.error("ERRO DETALHADO AO BUSCAR USUÁRIOS:", err); 
+    console.error("Erro ao buscar usuários:", err); 
     res.status(500).json({ error: 'Erro ao buscar usuários' });
   }
 });
 
-// inserir
+// POST: Criar um novo usuário
 router.post('/', async (req, res) => {
-  const { nome, email } = req.body;
+  const { username, email, senha } = req.body;
   try {
     const result = await execQuery(
-      'INSERT INTO brenner.Usuarios (nome, email) VALUES ($1, $2) RETURNING *',
-      [nome, email]
+      'INSERT INTO brenner.usuarios (username, email, senha) VALUES ($1, $2, $3) RETURNING id_usuario, username, email',
+      [username, email, senha]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
+    console.error("Erro ao inserir usuário:", err); 
     res.status(500).json({ error: 'Erro ao inserir usuário' });
   }
 });
 
-// atualizar
+// PUT: Atualizar um usuário
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const { nome, email } = req.body;
+  const id = req.params.id;
+  const { username, email } = req.body;
   try {
     const result = await execQuery(
-      'UPDATE brenner.Usuarios SET nome=$1, email=$2 WHERE id=$3',
-      [nome, email, id]
+      'UPDATE brenner.usuarios SET username=$1, email=$2 WHERE id_usuario=$3 RETURNING id_usuario, username, email',
+      [username, email, id]
     );
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    res.sendStatus(204);
+    res.json(result.rows[0]);
   } catch (err) {
+    console.error("Erro ao atualizar usuário:", err); 
     res.status(500).json({ error: 'Erro ao atualizar usuário' });
   }
 });
 
-// deletar
+// DELETE: Deletar um usuário
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id;
   try {
-    const result = await execQuery('DELETE FROM brenner.Usuarios WHERE id=$1', [id]);
+    const result = await execQuery('DELETE FROM brenner.usuarios WHERE id_usuario=$1', [id]);
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
-    res.sendStatus(204);
+    res.status(204).send();
   } catch (err) {
+    console.error("Erro ao deletar usuário:", err); 
     res.status(500).json({ error: 'Erro ao deletar usuário' });
   }
 });
