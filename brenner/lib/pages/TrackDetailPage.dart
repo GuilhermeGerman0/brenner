@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../models/spotify_track.dart';
 import '../models/tablaturas.dart'; // <-- Aqui usamos a model
+import '../services/api_service.dart';
 
 class TrackDetailPage extends StatefulWidget {
   final SpotifyTrack track;
@@ -20,22 +21,10 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
   @override
   void initState() {
     super.initState();
-    _tablaturasFuture = _fetchTablaturas(widget.track.nome, widget.track.artista);
-  }
-
-  Future<List<Tablatura>> _fetchTablaturas(String nomeMusica, String nomeArtista) async {
-    final encodedNomeMusica = Uri.encodeComponent(nomeMusica.toLowerCase());
-    final encodedNomeArtista = Uri.encodeComponent(nomeArtista.toLowerCase());
-
-    final url = Uri.parse('http://10.0.2.2:3000/$encodedNomeMusica/$encodedNomeArtista');
-
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => Tablatura.fromJson(json)).toList();
-    } else {
-      throw Exception('Erro ao buscar tablaturas');
-    }
+    _tablaturasFuture = ApiService.getTablaturas(
+      widget.track.nome,
+      widget.track.artista,
+    );
   }
 
   Future<void> _abrirSpotify(BuildContext context, String url) async {
@@ -87,7 +76,10 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                   widget.track.nome,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -122,7 +114,8 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                       ),
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Ouvir no Spotify'),
-                      onPressed: () => _abrirSpotify(context, widget.track.spotifyUrl),
+                      onPressed: () =>
+                          _abrirSpotify(context, widget.track.spotifyUrl),
                     ),
                     const SizedBox(width: 12),
                     OutlinedButton.icon(
@@ -145,7 +138,11 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                 const SizedBox(height: 8),
                 const Text(
                   'Tablaturas',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 FutureBuilder<List<Tablatura>>(
@@ -154,11 +151,12 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return const Text(
-                        'Erro ao carregar tablaturas.',
-                        style: TextStyle(color: Colors.redAccent),
+                      return Text(
+                        'Erro ao carregar tablaturas:\n${snapshot.error}',
+                        style: const TextStyle(color: Colors.redAccent),
                       );
-                    } else if (snapshot.data == null || snapshot.data!.isEmpty) {
+                    } else if (snapshot.data == null ||
+                        snapshot.data!.isEmpty) {
                       return const Text(
                         'Nenhuma tablatura disponível para esta música.',
                         style: TextStyle(color: Colors.grey),
@@ -171,33 +169,48 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                         return Card(
                           color: Colors.grey[900],
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: ListTile(
-                            leading: const Icon(Icons.library_music, color: Colors.white),
+                            leading: const Icon(
+                              Icons.library_music,
+                              color: Colors.white,
+                            ),
                             title: Text(
                               tab.conteudo.length > 50
                                   ? '${tab.conteudo.substring(0, 50)}...'
                                   : tab.conteudo,
                               style: const TextStyle(color: Colors.white),
                             ),
-                            subtitle: Text('Postado por: ${tab.username}',
-                                style: const TextStyle(color: Colors.grey)),
+                            subtitle: Text(
+                              'Postado por: ${tab.username}',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
                             onTap: () {
                               showDialog(
                                 context: context,
                                 builder: (_) => AlertDialog(
                                   backgroundColor: Colors.grey[900],
-                                  title: Text('Tablatura - ${widget.track.nome}',
-                                      style: const TextStyle(color: Colors.white)),
+                                  title: Text(
+                                    'Tablatura - ${widget.track.nome}',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                                   content: SingleChildScrollView(
-                                    child: Text(tab.conteudo,
-                                        style: const TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      tab.conteudo,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                   ),
                                   actions: [
                                     TextButton(
-                                      child: const Text('Fechar',
-                                          style: TextStyle(color: Colors.green)),
-                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text(
+                                        'Fechar',
+                                        style: TextStyle(color: Colors.green),
+                                      ),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
                                     ),
                                   ],
                                 ),

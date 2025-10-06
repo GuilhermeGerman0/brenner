@@ -19,6 +19,7 @@ module.exports = (execQuery) => {
     router.get('/:nomeMusica/:nomeArtista', async (req, res) => {
         const nomeMusica = req.params.nomeMusica.toLowerCase()
         const nomeArtista = req.params.nomeArtista.toLowerCase()
+        console.log("Tentou pegar a tablatura")
         try{
             const results = await execQuery(`select t.conteudo, u.username from brenner.Tablaturas t join brenner.Usuarios u on t.idUsuario = u.idUsuario where t.idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}') and t.idArtista = (select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}')`)
             res.json(results)
