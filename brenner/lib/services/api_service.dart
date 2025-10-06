@@ -109,31 +109,9 @@ class ApiService {
     return (response as List).map((json) => Tablatura.fromJson(json)).toList();
   }
 
-  // Salvar música nas salvas
-  static Future<Map<String, dynamic>> salvarMusica(
-    int idUsuario,
-    int idMusica,
-  ) async {
-    return await httpPost('/salvas', {
-      'idUsuario': idUsuario,
-      'idMusica': idMusica,
-    });
-  }
-
-  // Salvar música nas salvas usando nomeMusica
-  static Future<Map<String, dynamic>> salvarMusicaPorNome(
-    int idUsuario,
-    String nomeMusica,
-  ) async {
-    return await httpPost('/salvas', {
-      'idUsuario': idUsuario,
-      'nomeMusica': nomeMusica,
-    });
-  }
-
   // Buscar músicas salvas do usuário
   static Future<List<SpotifyTrack>> getMusicasSalvas(int idUsuario) async {
-    final response = await httpGet('/salvas/$idUsuario');
+    final response = await httpGet('/Salvas/$idUsuario');
     return (response as List)
         .map((json) => SpotifyTrack.fromJson(json))
         .toList();
@@ -141,7 +119,7 @@ class ApiService {
 
   // Buscar músicas favoritas do usuário
   static Future<List<SpotifyTrack>> getMusicasFavoritas(int idUsuario) async {
-    final response = await httpGet('/favoritas/$idUsuario');
+    final response = await httpGet('/Favoritas/$idUsuario');
     return (response as List)
         .map((json) => SpotifyTrack.fromJson(json))
         .toList();
@@ -152,7 +130,7 @@ class ApiService {
     int idUsuario,
     int idMusica,
   ) async {
-    final url = '/favoritas';
+    final url = '/Favoritas';
     return await httpPost(url, {'idUsuario': idUsuario, 'idMusica': idMusica});
   }
 
@@ -160,7 +138,7 @@ class ApiService {
   static Future<List<SpotifyTrack>> getMusicasSalvasPorUsername(
     String username,
   ) async {
-    final response = await httpGet('/salvas/username/$username');
+    final response = await httpGet('/Salvas/username/$username');
     if (response is List) {
       return response.map((json) => SpotifyTrack.fromJson(json)).toList();
     } else {
@@ -173,7 +151,7 @@ class ApiService {
     String username,
   ) async {
     final response = await httpGet(
-      '/favoritas/' + Uri.encodeComponent(username),
+      '/Favoritas/' + Uri.encodeComponent(username),
     );
     return (response as List)
         .map((json) => SpotifyTrack.fromJson(json))
@@ -185,7 +163,7 @@ class ApiService {
     String username,
     int idMusica,
   ) async {
-    final url = Uri.parse('$baseUrl/favoritas');
+    final url = Uri.parse('$baseUrl/Favoritas');
     final response = await http.delete(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -207,7 +185,7 @@ class ApiService {
     String username,
     String idMusica,
   ) async {
-    return await httpPost('/favoritas', {
+    return await httpPost('/Salvas', {
       'username': username,
       'idMusica': idMusica,
     });
@@ -218,7 +196,7 @@ class ApiService {
     String username,
     String idMusica,
   ) async {
-    return await httpPost('/favoritas', {
+    return await httpPost('/Favoritas', {
       'username': username,
       'idMusica': idMusica,
     });
