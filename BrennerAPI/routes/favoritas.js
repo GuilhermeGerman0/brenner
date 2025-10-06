@@ -54,4 +54,5 @@ module.exports = (execQuery) => {
             return res.status(500).json({ error: "Erro ao buscar músicas favoritas" });
         }
     });
+    return router;
 }

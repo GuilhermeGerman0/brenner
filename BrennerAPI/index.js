@@ -32,12 +32,16 @@ const musicasRouter = require('./routes/musicas')(execQuery)
 const artistasRouter = require('./routes/artistas')(execQuery)
 const usuariosRouter = require('./routes/usuarios')(execQuery)
 const tablaturasRouter = require('./routes/tablaturas')(execQuery)
+const salvasRouter = require('./routes/salvas')(execQuery)
+const favoritasRouter = require('./routes/favoritas')(execQuery)
 
 // Use routers
 app.use('/Musicas', musicasRouter)
 app.use('/Artistas', artistasRouter)
 app.use('/Usuarios', usuariosRouter)
 app.use('/Tablaturas', tablaturasRouter)
+app.use('/Salvas', salvasRouter)
+app.use('/Favoritas', favoritasRouter)
 
 app.use('/', (req, res) => res.json ({
     message: 'Servidor em execucao!'

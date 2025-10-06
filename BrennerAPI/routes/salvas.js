@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 module.exports = (execQuery) => {
+
     // Adicionar música às salvas
     router.post('/', async (req, res) => {
         const username = req.body.username;
@@ -54,4 +55,5 @@ module.exports = (execQuery) => {
             return res.status(500).json({ error: "Erro ao buscar músicas salvas" });
         }
     });
+    return router
 }
