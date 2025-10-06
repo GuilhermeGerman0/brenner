@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/user.dart';
+import '../models/tablaturas.dart';
 
 class ApiService {
   static String get baseUrl {
@@ -12,22 +13,31 @@ class ApiService {
   }
 
   // LOGIN
-  static Future<Map<String, dynamic>> login(String usernameOrEmail, String senha) async {
+  static Future<Map<String, dynamic>> login(
+    String usernameOrEmail,
+    String senha,
+  ) async {
     final url = Uri.parse('$baseUrl/usuarios/login');
     final body = usernameOrEmail.contains('@')
         ? {'email': usernameOrEmail, 'senha': senha}
         : {'username': usernameOrEmail, 'senha': senha};
 
     try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(body),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 10));
 
-      if (response.statusCode == 200) return {"success": true, "message": "Login realizado com sucesso"};
+      if (response.statusCode == 200)
+        return {"success": true, "message": "Login realizado com sucesso"};
       final Map<String, dynamic> error = jsonDecode(response.body);
-      return {"success": false, "message": error["error"] ?? "Erro desconhecido"};
+      return {
+        "success": false,
+        "message": error["error"] ?? "Erro desconhecido",
+      };
     } catch (e) {
       return {"success": false, "message": "Erro ao conectar: $e"};
     }
@@ -37,16 +47,23 @@ class ApiService {
   static Future<Map<String, dynamic>> signup(User user) async {
     final url = Uri.parse('$baseUrl/usuarios');
     try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(user.toJson()),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            url,
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(user.toJson()),
+          )
+          .timeout(const Duration(seconds: 20));
 
-      if (response.statusCode == 201) return {"success": true, "message": "Usuário cadastrado com sucesso"};
-      if (response.statusCode == 409) return {"success": false, "message": "Usuário já existe"};
+      if (response.statusCode == 201)
+        return {"success": true, "message": "Usuário cadastrado com sucesso"};
+      if (response.statusCode == 409)
+        return {"success": false, "message": "Usuário já existe"};
       final Map<String, dynamic> error = jsonDecode(response.body);
-      return {"success": false, "message": error["error"] ?? "Erro desconhecido"};
+      return {
+        "success": false,
+        "message": error["error"] ?? "Erro desconhecido",
+      };
     } catch (e) {
       return {"success": false, "message": "Erro ao conectar: $e"};
     }
@@ -72,7 +89,21 @@ class ApiService {
       return {'success': true, 'message': 'Operação realizada'};
     } else {
       final data = jsonDecode(response.body);
-      return {'success': false, 'message': data['error'] ?? 'Erro desconhecido'};
+      return {
+        'success': false,
+        'message': data['error'] ?? 'Erro desconhecido',
+      };
     }
+  }
+
+  // GET Tablaturas por música e artista
+  static Future<List<Tablatura>> getTablaturas(
+    String nomeMusica,
+    String nomeArtista,
+  ) async {
+    final path =
+        "/tablaturas/${Uri.encodeComponent(nomeMusica.toLowerCase())}/${Uri.encodeComponent(nomeArtista.toLowerCase())}";
+    final response = await httpGet(path);
+    return (response as List).map((json) => Tablatura.fromJson(json)).toList();
   }
 }
