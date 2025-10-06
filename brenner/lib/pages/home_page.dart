@@ -7,7 +7,7 @@ import '../services/spotify_service.dart';
 import 'TrackDetailPage.dart';
 import 'search_page.dart';
 import 'profile_page.dart';
-import 'salvas_screen.dart';
+import 'Salvas_screen.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -54,8 +54,10 @@ class _HomePageState extends State<HomePage> {
     final historicoJson = prefs.getStringList('historico_musicas') ?? [];
     setState(() {
       historicoMusicas = historicoJson
-          .map((e) =>
-              SpotifyTrack.fromJson(Map<String, dynamic>.from(jsonDecode(e))))
+          .map(
+            (e) =>
+                SpotifyTrack.fromJson(Map<String, dynamic>.from(jsonDecode(e))),
+          )
           .toList();
     });
   }
@@ -67,7 +69,9 @@ class _HomePageState extends State<HomePage> {
     if (historicoMusicas.length > 10) {
       historicoMusicas = historicoMusicas.sublist(0, 10);
     }
-    final historicoJson = historicoMusicas.map((t) => jsonEncode(t.toJson())).toList();
+    final historicoJson = historicoMusicas
+        .map((t) => jsonEncode(t.toJson()))
+        .toList();
     await prefs.setStringList('historico_musicas', historicoJson);
     setState(() {});
   }
@@ -76,16 +80,27 @@ class _HomePageState extends State<HomePage> {
     await _adicionarAoHistorico(track);
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => TrackDetailPage(track: track)),
+      MaterialPageRoute(
+        builder: (_) => TrackDetailPage(track: track, user: widget.user),
+      ),
     );
     _carregarHistorico();
   }
 
-  void _irParaSearch() => Navigator.push(context, MaterialPageRoute(builder: (_) => SearchPage()));
+  void _irParaSearch() => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => SearchPage(user: widget.user)),
+  );
 
-  void _irParaProfile() => Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)));
+  void _irParaProfile() => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)),
+  );
 
-  void _irParaSalvas() => Navigator.push(context, MaterialPageRoute(builder: (_) => SalvasScreen()));
+  void _irParaSalvas() => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => SalvasScreen(user: widget.user)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +127,10 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: const Icon(Icons.person, color: Colors.white),
-              title: const Text('Perfil', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Perfil',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _irParaProfile();
@@ -120,7 +138,10 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: const Icon(Icons.save, color: Colors.white),
-              title: const Text('Salvas', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Salvas',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _irParaSalvas();
@@ -128,7 +149,10 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: const Icon(Icons.search, color: Colors.white),
-              title: const Text('Buscar', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Buscar',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _irParaSearch();
@@ -161,9 +185,10 @@ class _HomePageState extends State<HomePage> {
                 const Text(
                   'Músicas visitadas recentemente',
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -197,24 +222,30 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 )
                               else
-                                const Icon(Icons.music_note,
-                                    size: 60, color: Colors.white),
+                                const Icon(
+                                  Icons.music_note,
+                                  size: 60,
+                                  color: Colors.white,
+                                ),
                               const SizedBox(height: 6),
                               Text(
                                 track.nome,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: Colors.white),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Colors.white,
+                                ),
                               ),
                               Text(
                                 track.artista,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                    fontSize: 11, color: Colors.grey),
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ),
@@ -230,9 +261,10 @@ class _HomePageState extends State<HomePage> {
               const Text(
                 'Músicas mais ouvidas do momento',
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 12),
               if (ultimasMusicas.isEmpty)
@@ -248,7 +280,8 @@ class _HomePageState extends State<HomePage> {
                     return Card(
                       color: Colors.grey[900],
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: ListTile(
                         leading: track.imagemUrl.isNotEmpty
                             ? ClipRRect(
@@ -262,15 +295,22 @@ class _HomePageState extends State<HomePage> {
                               )
                             : const CircleAvatar(
                                 backgroundColor: Colors.blue,
-                                child: Icon(Icons.music_note,
-                                    color: Colors.white),
+                                child: Icon(
+                                  Icons.music_note,
+                                  color: Colors.white,
+                                ),
                               ),
-                        title: Text(track.nome,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white)),
-                        subtitle: Text('${track.artista} • ${track.album}',
-                            style: const TextStyle(color: Colors.grey)),
+                        title: Text(
+                          track.nome,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${track.artista} • ${track.album}',
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                         onTap: () => _abrirDetalheMusica(track),
                       ),
                     );

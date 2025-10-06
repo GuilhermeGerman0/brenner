@@ -161,28 +161,64 @@ class ApiService {
     String username,
   ) async {
     final response = await httpGet('/salvas/username/$username');
-    return (response as List)
-        .map((json) => SpotifyTrack.fromJson(json))
-        .toList();
+    if (response is List) {
+      return response.map((json) => SpotifyTrack.fromJson(json)).toList();
+    } else {
+      throw Exception('Resposta inesperada da API: $response');
+    }
   }
 
-  // Buscar músicas favoritas pelo username
+  // Buscar músicas favoritas do usuário por username
   static Future<List<SpotifyTrack>> getMusicasFavoritasPorUsername(
     String username,
   ) async {
-    final response = await httpGet('/favoritas/username/$username');
+    final response = await httpGet(
+      '/favoritas/' + Uri.encodeComponent(username),
+    );
     return (response as List)
         .map((json) => SpotifyTrack.fromJson(json))
         .toList();
   }
 
-  // Remover música das favoritas pelo username
+  // Remover música das favoritas por username
   static Future<Map<String, dynamic>> removerFavoritaPorUsername(
     String username,
     int idMusica,
   ) async {
-    final url = '/favoritas/username';
-    return await httpPost(url, {
+    final url = Uri.parse('$baseUrl/favoritas');
+    final response = await http.delete(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username, 'idMusica': idMusica}),
+    );
+    if (response.statusCode == 200) {
+      return {'success': true, 'message': 'Removido das favoritas'};
+    } else {
+      final data = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': data['error'] ?? 'Erro desconhecido',
+      };
+    }
+  }
+
+  // Salvar música nas favoritas por username
+  static Future<Map<String, dynamic>> salvarMusicaPorUsername(
+    String username,
+    String idMusica,
+  ) async {
+    return await httpPost('/favoritas', {
+      'username': username,
+      'idMusica': idMusica,
+    });
+  }
+
+  // Favoritar música por username
+  static Future<Map<String, dynamic>> favoritarMusicaPorUsername(
+    String username,
+    String idMusica,
+  ) async {
+    return await httpPost('/favoritas', {
       'username': username,
       'idMusica': idMusica,
     });

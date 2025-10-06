@@ -5,8 +5,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'TrackDetailPage.dart'; // <- importe a página de detalhe
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user.dart';
 
 class SearchPage extends StatefulWidget {
+  final User user;
+  const SearchPage({Key? key, required this.user}) : super(key: key);
+
   @override
   _SearchPageState createState() => _SearchPageState();
 }
@@ -73,7 +77,9 @@ class _SearchPageState extends State<SearchPage> {
     await prefs.setStringList('historico_musicas', historicoJson);
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => TrackDetailPage(track: track)),
+      MaterialPageRoute(
+        builder: (_) => TrackDetailPage(track: track, user: widget.user),
+      ),
     );
   }
 

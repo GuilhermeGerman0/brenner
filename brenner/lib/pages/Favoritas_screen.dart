@@ -23,14 +23,18 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
 
   void _carregarFavoritas() {
     setState(() {
-      _favoritasFuture = ApiService.getMusicasFavoritasPorUsername(widget.user.username);
+      _favoritasFuture = ApiService.getMusicasFavoritasPorUsername(
+        widget.user.username,
+      );
     });
   }
 
   void _abrirDetalheMusica(SpotifyTrack track) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => TrackDetailPage(track: track)),
+      MaterialPageRoute(
+        builder: (_) => TrackDetailPage(track: track, user: widget.user),
+      ),
     );
     _carregarFavoritas();
   }
@@ -94,10 +98,11 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
                     icon: const Icon(Icons.favorite, color: Colors.pinkAccent),
                     tooltip: 'Remover dos favoritos',
                     onPressed: () async {
-                      final result = await ApiService.removerFavoritaPorUsername(
-                        widget.user.username,
-                        int.parse(track.id),
-                      );
+                      final result =
+                          await ApiService.removerFavoritaPorUsername(
+                            widget.user.username,
+                            int.parse(track.id),
+                          );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(result['message'] ?? 'Removido!'),
