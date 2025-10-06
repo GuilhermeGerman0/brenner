@@ -6,11 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../models/tablaturas.dart'; // <-- Aqui usamos a model
 import '../services/api_service.dart';
+import '../models/user.dart';
 
 class TrackDetailPage extends StatefulWidget {
   final SpotifyTrack track;
+  final User user;
 
-  const TrackDetailPage({Key? key, required this.track}) : super(key: key);
+  const TrackDetailPage({Key? key, required this.track, required this.user})
+    : super(key: key);
 
   @override
   State<TrackDetailPage> createState() => _TrackDetailPageState();
@@ -127,21 +130,38 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                       icon: const Icon(Icons.star_border),
                       label: const Text('Salvar'),
                       onPressed: () async {
-                        // Recupera o idUsuario do SharedPreferences
-                        final prefs = await SharedPreferences.getInstance();
-                        final idUsuario = prefs.getInt('idUsuario');
-                        if (idUsuario == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Usuário não identificado. Faça login novamente.')),
-                          );
-                          return;
-                        }
-                        final result = await ApiService.salvarMusica(
-                          idUsuario,
-                          int.parse(widget.track.id), // Certifique-se que o modelo SpotifyTrack tem o campo id
+                        final result = await ApiService.salvarMusicaPorUsername(
+                          widget.user.username,
+                          widget.track.id,
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(result['message'] ?? 'Erro ao salvar')),
+                          SnackBar(
+                            content: Text(
+                              result['message'] ?? 'Erro ao salvar',
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white24),
+                      ),
+                      icon: const Icon(Icons.star_border),
+                      label: const Text('Favoritar'),
+                      onPressed: () async {
+                        final result = await ApiService.favoritarMusicaPorUsername(
+                          widget.user.username,
+                          widget.track.id,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              result['message'] ?? 'Erro ao favoritar',
+                            ),
+                          ),
                         );
                       },
                     ),

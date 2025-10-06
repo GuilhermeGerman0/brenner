@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
+import 'TrackDetailPage.dart';
 
 class SalvasScreen extends StatefulWidget {
   final User user;
@@ -85,6 +86,16 @@ class _SalvasScreenState extends State<SalvasScreen> {
                     track.artista,
                     style: const TextStyle(color: Colors.grey),
                   ),
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            TrackDetailPage(track: track, user: widget.user),
+                      ),
+                    );
+                    _carregarSalvas();
+                  },
                 ),
               );
             },
