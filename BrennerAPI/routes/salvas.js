@@ -13,7 +13,7 @@ module.exports = (execQuery) => {
                 return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const idUsuario = usuario[0].idUsuario;
-            await execQuery(`insert into brenner.Salvas (idUsuario, idMusica) values (${idUsuario}, ${idMusica})`);
+            await execQuery(`insert into brenner.Salvas (idUsuario, idMusicaSpotify) values (${idUsuario}, ${idMusica})`);
             res.sendStatus(201);
         } catch (error) {
             return res.status(500).json({ error: "Erro ao adicionar música às salvas" });
@@ -30,7 +30,7 @@ module.exports = (execQuery) => {
                 return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const idUsuario = usuario[0].idUsuario;
-            const result = await execQuery(`delete from brenner.Salvas where idUsuario = ${idUsuario} and idMusica = ${idMusica}`);
+            const result = await execQuery(`delete from brenner.Salvas where idUsuario = ${idUsuario} and idMusicaSpotify = ${idMusica}`);
             if (result.rowsAffected[0] === 0) {
                 return res.status(404).json({ error: "Música não encontrada nas salvas" });
             }
@@ -40,7 +40,7 @@ module.exports = (execQuery) => {
         }
     });
 
-    // Listar músicas salvas de um usuário
+    // Listar id das musicas salvas de um usuário
     router.get('/:username', async (req, res) => {
         const username = req.params.username;
         try {
@@ -49,11 +49,12 @@ module.exports = (execQuery) => {
                 return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const idUsuario = usuario[0].idUsuario;
-            const results = await execQuery(`select m.* from brenner.Musicas m join brenner.Salvas f on m.idMusica = f.idMusica where f.idUsuario = ${idUsuario}`);
+            const results = await execQuery(`select s.idMusicaSpotify from brenner.Salvas s join brenner.Usuarios u on s.idUsuario = u.idUsuario where s.idUsuario = ${idUsuario}`);
             res.json(results);
         } catch (error) {
             return res.status(500).json({ error: "Erro ao buscar músicas salvas" });
         }
     });
+    
     return router
 }
