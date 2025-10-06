@@ -14,6 +14,39 @@ module.exports = (execQuery) => {
         res.sendStatus(201)
     })
 
+    // Inserir tablatura com nome da música e nome do artista
+
+    router.post('/nome', async (req, res) => {
+        const nomeMusica = req.body.nomeMusica.toLowerCase()
+        const nomeArtista = req.body.nomeArtista.toLowerCase()
+        const idUsuario = req.body.idUsuario
+        let conteudo = req.body.conteudo
+        conteudo = conteudo.replace(/'/g, "''") 
+        try {
+            let artista = await execQuery(`select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}'`)
+            let idArtista
+            if (!artista[0]) {
+                await execQuery(`insert into brenner.Artistas (nomeArtista, genero) values ('${nomeArtista}', 'genero desconhecido')`)
+                artista = await execQuery(`select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}'`)
+            }
+            idArtista = artista[0].idArtista
+
+            let musica = await execQuery(`select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}'`)
+            let idMusica
+            if (!musica[0]) {
+                await execQuery(`insert into brenner.Musicas (nomeMusica, idArtista, album, anoLancamento) values ('${nomeMusica}', ${idArtista}, 'album desconhecido', 0)`)
+                musica = await execQuery(`select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}'`)
+            }
+            idMusica = musica[0].idMusica
+
+            await execQuery(`insert into brenner.Tablaturas (idMusica, idArtista, idUsuario, conteudo) values (${idMusica}, ${idArtista}, ${idUsuario}, '${conteudo}')`)
+            res.sendStatus(201)
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({error: "Erro ao inserir a tablatura - problema ao criar artista ou música"})
+        }   
+    })
+
     // Pesquisar por nome e artista e pegar o username do usuário que postou
 
     router.get('/:nomeMusica/:nomeArtista', async (req, res) => {
