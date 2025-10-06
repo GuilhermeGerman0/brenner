@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
 
   void _irParaProfile() => Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)));
 
-  void _irParaSalvas() => Navigator.push(context, MaterialPageRoute(builder: (_) => const SalvasScreen()));
+  void _irParaSalvas() => Navigator.push(context, MaterialPageRoute(builder: (_) => SalvasScreen()));
 
   @override
   Widget build(BuildContext context) {

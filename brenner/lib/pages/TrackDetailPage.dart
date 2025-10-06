@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../models/tablaturas.dart'; // <-- Aqui usamos a model
 import '../services/api_service.dart';
@@ -125,9 +126,22 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                       ),
                       icon: const Icon(Icons.star_border),
                       label: const Text('Salvar'),
-                      onPressed: () {
+                      onPressed: () async {
+                        // Recupera o idUsuario do SharedPreferences
+                        final prefs = await SharedPreferences.getInstance();
+                        final idUsuario = prefs.getInt('idUsuario');
+                        if (idUsuario == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Usuário não identificado. Faça login novamente.')),
+                          );
+                          return;
+                        }
+                        final result = await ApiService.salvarMusica(
+                          idUsuario,
+                          int.parse(widget.track.id), // Certifique-se que o modelo SpotifyTrack tem o campo id
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Salvo (placeholder)')),
+                          SnackBar(content: Text(result['message'] ?? 'Erro ao salvar')),
                         );
                       },
                     ),

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class SpotifyTrack extends Equatable {
+  final String id;
   final String nome;
   final String artista;
   final String album;
@@ -10,6 +11,7 @@ class SpotifyTrack extends Equatable {
   final String genero;
 
   const SpotifyTrack({
+    required this.id,
     required this.nome,
     required this.artista,
     required this.album,
@@ -20,7 +22,8 @@ class SpotifyTrack extends Equatable {
   });
 
   factory SpotifyTrack.fromJson(Map<String, dynamic> json) {
-    final artists = (json['artists'] as List<dynamic>?)
+    final artists =
+        (json['artists'] as List<dynamic>?)
             ?.map((a) => a['name'] as String? ?? '')
             .where((name) => name.isNotEmpty)
             .join(', ') ??
@@ -37,7 +40,9 @@ class SpotifyTrack extends Equatable {
 
     final genero = (json['genero'] as String?) ?? '';
 
+    // Garante que o campo id sempre será preenchido corretamente
     return SpotifyTrack(
+      id: json['id']?.toString() ?? '',
       nome: json['name'] as String? ?? '',
       artista: artists,
       album: albumInfo?['name'] as String? ?? '',
@@ -49,15 +54,25 @@ class SpotifyTrack extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-        'name': nome,
-        'artists': artista.split(', '),
-        'album': album,
-        'imageUrl': imagemUrl,
-        'spotifyUrl': spotifyUrl,
-        'ano': ano,
-        'genero': genero,
-      };
+    'id': id,
+    'name': nome,
+    'artists': artista.split(', '),
+    'album': album,
+    'imageUrl': imagemUrl,
+    'spotifyUrl': spotifyUrl,
+    'ano': ano,
+    'genero': genero,
+  };
 
   @override
-  List<Object?> get props => [nome, artista, album, imagemUrl, spotifyUrl, ano, genero];
+  List<Object?> get props => [
+    id,
+    nome,
+    artista,
+    album,
+    imagemUrl,
+    spotifyUrl,
+    ano,
+    genero,
+  ];
 }

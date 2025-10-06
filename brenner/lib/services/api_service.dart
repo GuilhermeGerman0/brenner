@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/tablaturas.dart';
+import '../models/spotify_track.dart';
 
 class ApiService {
   static String get baseUrl {
@@ -105,5 +107,35 @@ class ApiService {
         "/tablaturas/${Uri.encodeComponent(nomeMusica.toLowerCase())}/${Uri.encodeComponent(nomeArtista.toLowerCase())}";
     final response = await httpGet(path);
     return (response as List).map((json) => Tablatura.fromJson(json)).toList();
+  }
+
+  // Salvar música nas salvas
+  static Future<Map<String, dynamic>> salvarMusica(
+    int idUsuario,
+    int idMusica,
+  ) async {
+    return await httpPost('/salvas', {
+      'idUsuario': idUsuario,
+      'idMusica': idMusica,
+    });
+  }
+
+  // Salvar música nas salvas usando nomeMusica
+  static Future<Map<String, dynamic>> salvarMusicaPorNome(
+    int idUsuario,
+    String nomeMusica,
+  ) async {
+    return await httpPost('/salvas', {
+      'idUsuario': idUsuario,
+      'nomeMusica': nomeMusica,
+    });
+  }
+
+  // Buscar músicas salvas do usuário
+  static Future<List<SpotifyTrack>> getMusicasSalvas(int idUsuario) async {
+    final response = await httpGet('/salvas/$idUsuario');
+    return (response as List)
+        .map((json) => SpotifyTrack.fromJson(json))
+        .toList();
   }
 }
