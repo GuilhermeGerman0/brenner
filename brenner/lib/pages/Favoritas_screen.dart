@@ -1,49 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
+import 'TrackDetailPage.dart';
 
-class SalvasScreen extends StatefulWidget {
+class FavoritasScreen extends StatefulWidget {
   final User user;
-
-  const SalvasScreen({Key? key, required this.user}) : super(key: key);
+  const FavoritasScreen({Key? key, required this.user}) : super(key: key);
 
   @override
-  State<SalvasScreen> createState() => _SalvasScreenState();
+  State<FavoritasScreen> createState() => _FavoritasScreenState();
 }
 
-class _SalvasScreenState extends State<SalvasScreen> {
-  late Future<List<SpotifyTrack>> _salvasFuture;
+class _FavoritasScreenState extends State<FavoritasScreen> {
+  late Future<List<SpotifyTrack>> _favoritasFuture;
 
   @override
   void initState() {
     super.initState();
-    _carregarSalvas();
+    _carregarFavoritas();
   }
 
-  Future<void> _carregarSalvas() async {
+  void _carregarFavoritas() {
     setState(() {
-      _salvasFuture = ApiService.getMusicasSalvasPorUsername(
-        widget.user.username,
-      );
+      _favoritasFuture = ApiService.getMusicasFavoritasPorUsername(widget.user.username);
     });
+  }
+
+  void _abrirDetalheMusica(SpotifyTrack track) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TrackDetailPage(track: track)),
+    );
+    _carregarFavoritas();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Músicas Salvas')),
+      appBar: AppBar(title: const Text('Músicas Favoritas')),
       backgroundColor: Colors.black,
       body: FutureBuilder<List<SpotifyTrack>>(
-        future: _salvasFuture,
+        future: _favoritasFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Erro ao carregar músicas salvas:\n${snapshot.error}',
+                'Erro ao carregar músicas favoritas:\n${snapshot.error}',
                 style: const TextStyle(color: Colors.redAccent),
                 textAlign: TextAlign.center,
               ),
@@ -51,18 +56,18 @@ class _SalvasScreenState extends State<SalvasScreen> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
               child: Text(
-                'Nenhuma música salva encontrada.',
+                'Nenhuma música favorita encontrada.',
                 style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
             );
           }
 
-          final salvas = snapshot.data!;
+          final favoritas = snapshot.data!;
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: salvas.length,
+            itemCount: favoritas.length,
             itemBuilder: (context, index) {
-              SpotifyTrack track = salvas[index];
+              SpotifyTrack track = favoritas[index];
               return Card(
                 color: Colors.grey[900],
                 shape: RoundedRectangleBorder(
@@ -85,6 +90,23 @@ class _SalvasScreenState extends State<SalvasScreen> {
                     track.artista,
                     style: const TextStyle(color: Colors.grey),
                   ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.favorite, color: Colors.pinkAccent),
+                    tooltip: 'Remover dos favoritos',
+                    onPressed: () async {
+                      final result = await ApiService.removerFavoritaPorUsername(
+                        widget.user.username,
+                        int.parse(track.id),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(result['message'] ?? 'Removido!'),
+                        ),
+                      );
+                      _carregarFavoritas();
+                    },
+                  ),
+                  onTap: () => _abrirDetalheMusica(track),
                 ),
               );
             },

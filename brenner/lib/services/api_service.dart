@@ -138,4 +138,53 @@ class ApiService {
         .map((json) => SpotifyTrack.fromJson(json))
         .toList();
   }
+
+  // Buscar músicas favoritas do usuário
+  static Future<List<SpotifyTrack>> getMusicasFavoritas(int idUsuario) async {
+    final response = await httpGet('/favoritas/$idUsuario');
+    return (response as List)
+        .map((json) => SpotifyTrack.fromJson(json))
+        .toList();
+  }
+
+  // Remover música das favoritas
+  static Future<Map<String, dynamic>> removerFavorita(
+    int idUsuario,
+    int idMusica,
+  ) async {
+    final url = '/favoritas';
+    return await httpPost(url, {'idUsuario': idUsuario, 'idMusica': idMusica});
+  }
+
+  // Buscar músicas salvas pelo username
+  static Future<List<SpotifyTrack>> getMusicasSalvasPorUsername(
+    String username,
+  ) async {
+    final response = await httpGet('/salvas/username/$username');
+    return (response as List)
+        .map((json) => SpotifyTrack.fromJson(json))
+        .toList();
+  }
+
+  // Buscar músicas favoritas pelo username
+  static Future<List<SpotifyTrack>> getMusicasFavoritasPorUsername(
+    String username,
+  ) async {
+    final response = await httpGet('/favoritas/username/$username');
+    return (response as List)
+        .map((json) => SpotifyTrack.fromJson(json))
+        .toList();
+  }
+
+  // Remover música das favoritas pelo username
+  static Future<Map<String, dynamic>> removerFavoritaPorUsername(
+    String username,
+    int idMusica,
+  ) async {
+    final url = '/favoritas/username';
+    return await httpPost(url, {
+      'username': username,
+      'idMusica': idMusica,
+    });
+  }
 }
