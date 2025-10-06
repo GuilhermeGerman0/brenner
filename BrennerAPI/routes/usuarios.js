@@ -12,6 +12,18 @@ module.exports = (execQuery) => {
         res.json(results)
     })
 
+    // Pesquisar a foto do usuário por username
+
+    router.get('/foto/:username', async (req, res) => {
+        const username = req.params.username
+        try{
+            const results = await execQuery(`select foto from brenner.Usuarios where username = '${username}'`)
+            res.json(results)
+        }catch(error){
+            return res.status(500).json({error: "Erro ao buscar a foto do usuário - usuário não encontrado"})
+        }
+    })
+
     // Pesquisa por Username
 
     router.get('/username/:username', async (req, res) => {
@@ -67,6 +79,24 @@ module.exports = (execQuery) => {
         }
     })
 
+    // Inserir foto do usuário
+
+    router.put('/foto/:username', async (req, res) => {
+        const username = req.params.username
+        const foto = req.body.foto
+        try {
+            const result = await execQuery(
+                `update brenner.Usuarios set foto = '${foto}' where username = '${username}'`
+            )
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ error: "Usuário não encontrado" })
+            }
+            res.sendStatus(200)
+        } catch (error) {
+            return res.status(500).json({ error: "Erro ao atualizar a foto do usuário" })
+        }
+    })
+
     // Inserir usuário
 
     router.post('/', async (req, res) => {
@@ -104,6 +134,24 @@ module.exports = (execQuery) => {
             res.sendStatus(200)
         } catch (error) {
             return res.status(500).json({ error: "Erro ao deletar o usuário" })
+        }
+    })
+
+    // Deletar foto de usuário por username
+
+    router.delete('/foto/:username', async (req, res) => {
+        const username = req.params.username
+        try {
+            const result = await execQuery(
+                `update brenner.Usuarios set foto = NULL where username = '${username}'`
+            )
+            if (result.rowsAffected[0] === 0) {
+                return res.status(404).json({ error: "Usuário não encontrado" })
+            }
+            res.sendStatus(200)
+        }
+        catch (error) {
+            return res.status(500).json({ error: "Erro ao deletar a foto do usuário" })
         }
     })
 
