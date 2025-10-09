@@ -13,7 +13,7 @@ module.exports = (execQuery) => {
                 return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const idUsuario = usuario[0].idUsuario;
-            await execQuery(`insert into brenner.Salvas (idUsuario, idMusicaSpotify) values (${idUsuario}, ${idMusica})`);
+            await execQuery(`insert into brenner.Salvas (idUsuario, idMusicaSpotify) values (${idUsuario}, '${idMusica}')`);
             res.sendStatus(201);
         } catch (error) {
             return res.status(500).json({ error: "Erro ao adicionar música às salvas" });

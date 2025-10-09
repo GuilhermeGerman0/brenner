@@ -87,6 +87,12 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
+
+    print("POST para $url");
+    print("Body: $body");
+    print("Status: ${response.statusCode}");
+    print("Resposta: ${response.body}");
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       return {'success': true, 'message': 'Operação realizada'};
     } else {
