@@ -24,8 +24,9 @@ class _SalvasScreenState extends State<SalvasScreen> {
   }
 
   Future<void> _carregarSalvas() async {
+    final apiService = ApiService();
     setState(() {
-      _salvasFuture = ApiService.getMusicasSalvasPorUsername(
+      _salvasFuture = apiService.getMusicasSalvasPorUsername(
         widget.user.username,
       );
     });

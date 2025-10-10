@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/tablaturas.dart';
 import '../models/spotify_track.dart';
+import 'spotify_service.dart';
 
 class ApiService {
   static String get baseUrl {
@@ -75,6 +76,7 @@ class ApiService {
   static Future<dynamic> httpGet(String path) async {
     final url = Uri.parse('$baseUrl$path');
     final response = await http.get(url);
+    print("Get pegou: ${response.body}");
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Erro GET $path: ${response.body}');
   }
@@ -140,16 +142,34 @@ class ApiService {
     return await httpPost(url, {'idUsuario': idUsuario, 'idMusica': idMusica});
   }
 
-  // Buscar músicas salvas pelo username
-  static Future<List<SpotifyTrack>> getMusicasSalvasPorUsername(
+  final SpotifyService spotifyService = SpotifyService();
+
+  Future<List<SpotifyTrack>> buscarMusicasSalvasPorIds(List<String> ids) async {
+    List<SpotifyTrack> tracks = [];
+    for (final id in ids) {
+      try {
+        final track = await spotifyService.getTrackById(id);
+        tracks.add(track);
+      } catch (e) {
+        // Se der erro, pode ignorar ou tratar
+      }
+    }
+    return tracks;
+  }
+
+  Future<List<SpotifyTrack>> getMusicasSalvasPorUsername(
     String username,
   ) async {
-    final response = await httpGet('/Salvas/username/$username');
-    if (response is List) {
-      return response.map((json) => SpotifyTrack.fromJson(json)).toList();
-    } else {
-      throw Exception('Resposta inesperada da API: $response');
+    final idsResponse = await httpGet('/Salvas/$username');
+    if (idsResponse is! List) return [];
+    // Monta a lista de ids
+    List<String> ids = [];
+    for (var item in idsResponse) {
+      final id = item['idMusicaSpotify'];
+      if (id != null) ids.add(id);
     }
+    // Busca as músicas pelo array de ids
+    return await buscarMusicasSalvasPorIds(ids);
   }
 
   // Buscar músicas favoritas do usuário por username
