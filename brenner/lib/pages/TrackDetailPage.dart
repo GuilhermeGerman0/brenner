@@ -149,7 +149,7 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Colors.white24),
                       ),
-                      icon: const Icon(Icons.star_border),
+                      icon: const Icon(Icons.favorite),
                       label: const Text('Favoritar'),
                       onPressed: () async {
                         final result = await ApiService.favoritarMusicaPorUsername(

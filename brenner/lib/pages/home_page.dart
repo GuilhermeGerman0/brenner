@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:brenner/pages/Favoritas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
@@ -8,6 +9,8 @@ import 'TrackDetailPage.dart';
 import 'search_page.dart';
 import 'profile_page.dart';
 import 'Salvas_screen.dart';
+
+
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -101,6 +104,10 @@ class _HomePageState extends State<HomePage> {
     context,
     MaterialPageRoute(builder: (_) => SalvasScreen(user: widget.user)),
   );
+  void _irParaFavoritas() => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => FavoritasScreen(user: widget.user)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +152,17 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 Navigator.pop(context);
                 _irParaSalvas();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite, color: Colors.white),
+              title: const Text(
+                'Favoritas',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _irParaFavoritas();
               },
             ),
             ListTile(

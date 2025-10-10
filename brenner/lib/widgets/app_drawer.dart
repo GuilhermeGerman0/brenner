@@ -3,6 +3,7 @@ import '../pages/profile_page.dart';
 import '../pages/salvas_screen.dart';
 import '../pages/search_page.dart';
 import '../models/user.dart';
+import '../pages/Favoritas_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final User user;
@@ -19,12 +20,17 @@ class AppDrawer extends StatelessWidget {
 
   void _irParaSalvas(BuildContext context) {
     Navigator.push(context,
-        MaterialPageRoute(builder: (_) => const SalvasScreen()));
+        MaterialPageRoute(builder: (_) =>  SalvasScreen(user:user)));
+  }
+
+  void _irParaFavoritas(BuildContext context) {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (_) =>  FavoritasScreen(user:user)));
   }
 
   void _irParaSearch(BuildContext context) {
     Navigator.push(context,
-        MaterialPageRoute(builder: (_) => SearchPage()));
+        MaterialPageRoute(builder: (_) => SearchPage(user:user)));
   }
 
   @override
@@ -55,6 +61,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.person, color: Colors.white),
             title: const Text('Perfil', style: TextStyle(color: Colors.white)),
             onTap: () {
+              print("fezes12134342453456346");
               Navigator.pop(context);
               _irParaProfile(context);
             },
@@ -65,6 +72,14 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               _irParaSalvas(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.favorite, color: Colors.white),
+            title: const Text('Favoritas', style: TextStyle(color: Colors.white)),
+            onTap: () {
+              Navigator.pop(context); 
+              _irParaFavoritas(context);
             },
           ),
           ListTile(

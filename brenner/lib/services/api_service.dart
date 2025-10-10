@@ -173,15 +173,19 @@ class ApiService {
   }
 
   // Buscar músicas favoritas do usuário por username
-  static Future<List<SpotifyTrack>> getMusicasFavoritasPorUsername(
+  Future<List<SpotifyTrack>> getMusicasFavoritasPorUsername(
     String username,
   ) async {
-    final response = await httpGet(
-      '/Favoritas/' + Uri.encodeComponent(username),
-    );
-    return (response as List)
-        .map((json) => SpotifyTrack.fromJson(json))
-        .toList();
+    final idsResponse = await httpGet('/Favoritas/$username');
+    if (idsResponse is! List) return [];
+    // Monta a lista de ids
+    List<String> ids = [];
+    for (var item in idsResponse) {
+      final id = item['idMusicaSpotify'];
+      if (id != null) ids.add(id);
+    }
+    // Busca as músicas pelo array de ids
+    return await buscarMusicasSalvasPorIds(ids);
   }
 
   // Remover música das favoritas por username

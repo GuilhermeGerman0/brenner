@@ -4,19 +4,21 @@ const router = express.Router();
 module.exports = (execQuery) => {
     
     // Adicionar música às favoritas
-    router.post('/', async (req, res) => {
+   router.post('/', async (req, res) => {
         const username = req.body.username;
         const idMusica = req.body.idMusica;
         try {
             const usuario = await execQuery(`select idUsuario from brenner.Usuarios where username = '${username}'`);
-            console.log(usuario);
             if (!usuario[0]) {
                 return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const idUsuario = usuario[0].idUsuario;
-            console.log(idUsuario);
-            console.log(idMusica);
-            await execQuery(`insert into brenner.Favoritas (idUsuario, idMusicaSpotify) values (${idUsuario}, ${idMusica})`);
+            // Verifica se já existe
+            const jaFavorita = await execQuery(`select 1 from brenner.Favoritas where idUsuario = ${idUsuario} and idMusicaSpotify = '${idMusica}'`);
+            if (jaFavorita[0]) {
+                return res.status(409).json({ error: "Música já está nas favoritas" });
+            }
+            await execQuery(`insert into brenner.Favoritas (idUsuario, idMusicaSpotify) values (${idUsuario}, '${idMusica}')`);
             res.sendStatus(201);
         } catch (error) {
             return res.status(500).json({ error: "Erro ao adicionar música às favoritas" });
