@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
-import '../models/tablaturas.dart'; // <-- Aqui usamos a model
+import '../models/tablaturas.dart'; 
 import '../services/api_service.dart';
 import '../models/user.dart';
 
@@ -21,6 +21,10 @@ class TrackDetailPage extends StatefulWidget {
 
 class _TrackDetailPageState extends State<TrackDetailPage> {
   late Future<List<Tablatura>> _tablaturasFuture;
+  bool _jaSalva = false;
+  bool _loadingSalva = true;
+  bool _jaFavorita = false;
+  bool _loadingFavorita = true;
 
   @override
   void initState() {
@@ -29,6 +33,32 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
       widget.track.nome,
       widget.track.artista,
     );
+    _verificarSeSalva();
+    _verificarSeFavorita();
+  }
+
+  void _verificarSeSalva() async {
+    setState(() {
+      _loadingSalva = true;
+    });
+    final apiService = ApiService();
+    final salvas = await apiService.getMusicasSalvasPorUsername(widget.user.username);
+    setState(() {
+      _jaSalva = salvas.any((track) => track.id == widget.track.id);
+      _loadingSalva = false;
+    });
+  }
+
+  void _verificarSeFavorita() async {
+    setState(() {
+      _loadingFavorita = true;
+    });
+    final apiService = ApiService();
+    final favoritas = await apiService.getMusicasFavoritasPorUsername(widget.user.username);
+    setState(() {
+      _jaFavorita = favoritas.any((track) => track.id == widget.track.id);
+      _loadingFavorita = false;
+    });
   }
 
   Future<void> _abrirSpotify(BuildContext context, String url) async {
@@ -127,21 +157,34 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Colors.white24),
                       ),
-                      icon: const Icon(Icons.star_border),
-                      label: const Text('Salvar'),
-                      onPressed: () async {
-                        final result = await ApiService.salvarMusicaPorUsername(
-                          widget.user.username,
-                          widget.track.id,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              result['message'] ?? 'Erro ao salvar',
-                            ),
-                          ),
-                        );
-                      },
+                      icon: _loadingSalva
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : Icon(_jaSalva ? Icons.star : Icons.star_border),
+                      label: Text(_jaSalva ? 'Remover Salva' : 'Salvar'),
+                      onPressed: _loadingSalva
+                          ? null
+                          : () async {
+                              String message;
+                              if (_jaSalva) {
+                                // Remove dos salvos
+                                final result = await ApiService.removerMusicaSalvaPorUsername(
+                                  widget.user.username,
+                                  widget.track.id,
+                                );
+                                message = result['message'] ?? 'Removido das salvas';
+                              } else {
+                                // Adiciona aos salvos
+                                final result = await ApiService.salvarMusicaPorUsername(
+                                  widget.user.username,
+                                  widget.track.id,
+                                );
+                                message = result['message'] ?? 'Salvo com sucesso';
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(message)),
+                              );
+                              _verificarSeSalva();
+                            },
                     ),
                     const SizedBox(width: 12),
                     OutlinedButton.icon(
@@ -149,21 +192,32 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: Colors.white24),
                       ),
-                      icon: const Icon(Icons.favorite),
-                      label: const Text('Favoritar'),
-                      onPressed: () async {
-                        final result = await ApiService.favoritarMusicaPorUsername(
-                          widget.user.username,
-                          widget.track.id,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              result['message'] ?? 'Erro ao favoritar',
-                            ),
-                          ),
-                        );
-                      },
+                      icon: _loadingFavorita
+                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : Icon(_jaFavorita ? Icons.favorite : Icons.favorite_border),
+                      label: Text(_jaFavorita ? 'Remover Favorita' : 'Favoritar'),
+                      onPressed: _loadingFavorita
+                          ? null
+                          : () async {
+                              String message;
+                              if (_jaFavorita) {
+                                final result = await ApiService.removerMusicaFavoritaPorUsername(
+                                  widget.user.username,
+                                  widget.track.id,
+                                );
+                                message = result['message'] ?? 'Removido das favoritas';
+                              } else {
+                                final result = await ApiService.favoritarMusicaPorUsername(
+                                  widget.user.username,
+                                  widget.track.id,
+                                );
+                                message = result['message'] ?? 'Favoritado com sucesso';
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(message)),
+                              );
+                              _verificarSeFavorita();
+                            },
                     ),
                   ],
                 ),

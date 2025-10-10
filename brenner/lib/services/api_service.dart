@@ -63,6 +63,7 @@ class ApiService {
       if (response.statusCode == 409)
         return {"success": false, "message": "Usuário já existe"};
       final Map<String, dynamic> error = jsonDecode(response.body);
+      print(error);
       return {
         "success": false,
         "message": error["error"] ?? "Erro desconhecido",
@@ -76,7 +77,6 @@ class ApiService {
   static Future<dynamic> httpGet(String path) async {
     final url = Uri.parse('$baseUrl$path');
     final response = await http.get(url);
-    print("Get pegou: ${response.body}");
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Erro GET $path: ${response.body}');
   }
@@ -89,11 +89,6 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
-
-    print("POST para $url");
-    print("Body: $body");
-    print("Status: ${response.statusCode}");
-    print("Resposta: ${response.body}");
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return {'success': true, 'message': 'Operação realizada'};
@@ -134,13 +129,6 @@ class ApiService {
   }
 
   // Remover música das favoritas
-  static Future<Map<String, dynamic>> removerFavorita(
-    int idUsuario,
-    int idMusica,
-  ) async {
-    final url = '/Favoritas';
-    return await httpPost(url, {'idUsuario': idUsuario, 'idMusica': idMusica});
-  }
 
   final SpotifyService spotifyService = SpotifyService();
 
@@ -189,9 +177,9 @@ class ApiService {
   }
 
   // Remover música das favoritas por username
-  static Future<Map<String, dynamic>> removerFavoritaPorUsername(
+  static Future<Map<String, dynamic>> removerMusicaFavoritaPorUsername(
     String username,
-    int idMusica,
+    String idMusica,
   ) async {
     final url = Uri.parse('$baseUrl/Favoritas');
     final response = await http.delete(
@@ -230,5 +218,27 @@ class ApiService {
       'username': username,
       'idMusica': idMusica,
     });
+  }
+
+  // Remover música salva por username
+  static Future<Map<String, dynamic>> removerMusicaSalvaPorUsername(
+    String username,
+    String idMusica,
+  ) async {
+    final url = Uri.parse('$baseUrl/Salvas');
+    final response = await http.delete(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username, 'idMusica': idMusica}),
+    );
+    if (response.statusCode == 200) {
+      return {'success': true, 'message': 'Removido das salvas'};
+    } else {
+      final data = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': data['error'] ?? 'Erro desconhecido',
+      };
+    }
   }
 }

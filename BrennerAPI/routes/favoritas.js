@@ -35,10 +35,7 @@ module.exports = (execQuery) => {
                 return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const idUsuario = usuario[0].idUsuario;
-            const result = await execQuery(`delete from brenner.Favoritas where idUsuario = ${idUsuario} and idMusicaSpotify = ${idMusica}`);
-            if (result.rowsAffected[0] === 0) {
-                return res.status(404).json({ error: "Música não encontrada nas favoritas" });
-            }
+            const result = await execQuery(`delete from brenner.Favoritas where idUsuario = ${idUsuario} and idMusicaSpotify = '${idMusica}'`);
             res.sendStatus(200);
         } catch (error) {
             return res.status(500).json({ error: "Erro ao remover música das favoritas" });

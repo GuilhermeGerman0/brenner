@@ -100,11 +100,22 @@ module.exports = (execQuery) => {
     // Inserir usuário
 
     router.post('/', async (req, res) => {
-        const username = req.body.username
-        const email = req.body.email
-        const senha = req.body.senha
-        await execQuery(`insert into brenner.Usuarios values ('${username}', '${email}', '${senha}')`)
-        res.sendStatus(201)
+        const username = req.body.username;
+        const email = req.body.email;
+        const senha = req.body.senha;
+        console.log("Tentando inserir usuário: " + username + ", " + email+ ", " + senha);
+        try {
+            await execQuery(`insert into brenner.Usuarios (username, email, senha) values ('${username}', '${email}', '${senha}')`);
+            res.sendStatus(201);
+        } catch (error) {
+            console.log(error.message);
+            // Se for erro de duplicidade, retorne 409
+            if (error && error.message && error.message.includes('duplicate')) {
+                return res.status(409).json({ error: "Usuário já existe" });
+            }
+            // Para outros erros, retorne 500 e mensagem
+            return res.status(500).json({ error: "Erro ao cadastrar usuário" });
+        }
     })
 
     // Deletar usuário por id
