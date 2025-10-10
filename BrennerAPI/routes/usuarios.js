@@ -97,6 +97,34 @@ module.exports = (execQuery) => {
         }
     })
 
+    // Pegar bio do usuario
+    router.get('/bio/:username', async (req, res) => {
+        const username = req.params.username;
+        try {
+            const results = await execQuery(`select biografia from brenner.Usuarios where username = '${username}'`);
+            if (!results[0] || results[0].biografia == null) {
+                return res.json(""); // ou retorne uma mensagem padrão
+            }
+            res.json(results[0].biografia);
+        } catch (error) {
+            return res.status(500).json({error: "Erro ao pegar a bio do usuário"});
+        }
+    })
+
+    
+    // Atualizar bio
+
+    router.put('/bio/:username', async (req, res) => {
+        const username = req.params.username
+        const bio = req.body.bio
+        try{
+            const result = await execQuery(`update brenner.Usuarios set biografia = '${bio}' where username = '${username}'`)
+            res.sendStatus(200)
+        }catch (error) {
+            return res.status(500).json({error: "Erro ao inserir bio do usuário"})
+        }
+    })
+
     // Inserir usuário
 
     router.post('/', async (req, res) => {

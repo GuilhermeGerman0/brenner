@@ -209,6 +209,37 @@ class ApiService {
     });
   }
 
+  // Atualizar a bio do usuário
+
+  static Future<Map<String, dynamic>> atualizarBio(
+    String username,
+    String bio,
+  ) async {
+    final url = Uri.parse('$baseUrl/Usuarios/Bio/$username');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username, 'bio': bio}),
+    );
+    if (response.statusCode == 200) {
+      return {'success': true, 'message': 'Bio atualizado'};
+    } else {
+      final data = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': data['error'] ?? 'Erro desconhecido',
+      };
+    }
+  }
+
+  // Pegar a bio de um usuário
+
+  static Future getBiografia(String username) async {
+    final response = await httpGet('/Usuarios/bio/$username');
+    return response.toString();
+  }
+
+
   // Favoritar música por username
   static Future<Map<String, dynamic>> favoritarMusicaPorUsername(
     String username,

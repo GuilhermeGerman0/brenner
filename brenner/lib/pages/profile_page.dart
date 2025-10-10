@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/music_repository.dart';
 import '../models/spotify_track.dart';
+import '../services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final User user;
@@ -13,29 +14,41 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String bio = "Olá! Eu ainda não coloquei minha bio 😎";
+  String bio = "Carregando ...";
   bool isEditingBio = false;
   final TextEditingController _bioController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _bioController.text = bio;
+    _carregarBio();
+  }
+
+  Future<void> _carregarBio() async {
+    final bioApi = await ApiService.getBiografia(widget.user.username);
+    setState(() {
+      bio = (bioApi == null || bioApi == 'null' || bioApi.isEmpty)
+          ? "Olá! Eu ainda não coloquei minha bio "
+          : bioApi.toString();
+      _bioController.text = bio;
+    });
   }
 
   void _editarBio() {
     setState(() => isEditingBio = true);
   }
 
-  void _salvarBio() {
+  void _salvarBio() async {
+    final novoBio = _bioController.text.trim().isEmpty
+        ? "Olá! Eu ainda não coloquei minha bio"
+        : _bioController.text.trim();
     setState(() {
-      bio = _bioController.text.trim().isEmpty
-          ? "Olá! Eu ainda não coloquei minha bio 😎"
-          : _bioController.text.trim();
+      bio = novoBio;
       isEditingBio = false;
     });
+    final result = await ApiService.atualizarBio(widget.user.username, novoBio);
     ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Bio atualizada!')));
+        .showSnackBar(SnackBar(content: Text(result['message'] ?? 'Bio atualizada!')));
   }
 
   void _irParaHome() {

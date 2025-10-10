@@ -128,19 +128,30 @@ class _HomePageState extends State<HomePage> {
               decoration: const BoxDecoration(color: Colors.black),
             ),
             ListTile(
+              leading: const Icon(Icons.search, color: Colors.white),
+              title: const Text(
+                'Buscar',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _irParaSearch();
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.home, color: Colors.white),
               title: const Text('Home', style: TextStyle(color: Colors.white)),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.person, color: Colors.white),
+              leading: const Icon(Icons.favorite, color: Colors.white),
               title: const Text(
-                'Perfil',
+                'Favoritas',
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context);
-                _irParaProfile();
+                _irParaFavoritas();
               },
             ),
             ListTile(
@@ -155,27 +166,16 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.favorite, color: Colors.white),
+              leading: const Icon(Icons.person, color: Colors.white),
               title: const Text(
-                'Favoritas',
+                'Perfil',
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context);
-                _irParaFavoritas();
+                _irParaProfile();
               },
-            ),
-            ListTile(
-              leading: const Icon(Icons.search, color: Colors.white),
-              title: const Text(
-                'Buscar',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _irParaSearch();
-              },
-            ),
+            )
           ],
         ),
       ),
