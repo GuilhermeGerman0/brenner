@@ -13,6 +13,11 @@ module.exports = (execQuery) => {
                 return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const idUsuario = usuario[0].idUsuario;
+            // Verifica se já existe
+            const jaSalva = await execQuery(`select 1 from brenner.Salvas where idUsuario = ${idUsuario} and idMusicaSpotify = '${idMusica}'`);
+            if (jaSalva[0]) {
+                return res.status(409).json({ error: "Música já está nas salvas" });
+            }
             await execQuery(`insert into brenner.Salvas (idUsuario, idMusicaSpotify) values (${idUsuario}, '${idMusica}')`);
             res.sendStatus(201);
         } catch (error) {
