@@ -6,7 +6,8 @@ import '../models/spotify_track.dart';
 import '../services/spotify_service.dart';
 import '../widgets/app_drawer.dart';
 import 'TrackDetailPage.dart';
-
+import 'Favoritas_screen.dart';
+import '../services/api_service.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -35,8 +36,24 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _carregarUltimasMusicas() async {
     try {
-      final topTracks = await _spotifyService.searchTracks('top', limit: 10);
-      setState(() => ultimasMusicas = topTracks);
+      final apiService = ApiService();
+      final favoritas = await apiService.getMusicasFavoritasPorUsername(widget.user.username);
+      if (favoritas.isNotEmpty) {
+        final ultimaFavorita = favoritas.last;
+        final artistName = ultimaFavorita.artista;
+        final artistId = await _spotifyService.getArtistIdByName(artistName);
+        String? genero;
+        if (artistId != null) {
+          genero = await _spotifyService.getArtistGenre(artistId);
+        }
+        if (genero != null && genero.isNotEmpty) {
+          final tracks = await _spotifyService.searchTracksByGenre(genero);
+          setState(() => ultimasMusicas = tracks);
+        }
+      }else{
+        final tracks = await _spotifyService.searchTracksByGenre('rock nacional brasileiro');
+        setState(() => ultimasMusicas = tracks);
+      }
     } catch (e) {
       debugPrint('Erro ao carregar top tracks: $e');
     }
@@ -178,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 24),
               ],
               const Text(
-                'Músicas mais ouvidas do momento',
+                'Músicas recomendadas para você',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
