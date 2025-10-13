@@ -7,6 +7,7 @@ import '../services/spotify_service.dart';
 import '../widgets/app_drawer.dart';
 import 'TrackDetailPage.dart';
 
+
 class HomePage extends StatefulWidget {
   final User user;
   const HomePage({Key? key, required this.user}) : super(key: key);
@@ -23,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    historicoMusicas.clear();
     _carregarDados();
   }
 

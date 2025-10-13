@@ -145,7 +145,7 @@ class SpotifyService {
   // ======================
   // TOP 50 GLOBAL
   // ======================
-  Future<List<SpotifyTrack>> getTop50Global() async {
+  Future<List<SpotifyTrack>> getTop10Global() async {
     await _getToken();
     // Playlist oficial do Top 50 Global do Spotify
     const playlistId = '37i9dQZEVXbMDoHDwVN2tF';
@@ -156,7 +156,7 @@ class SpotifyService {
       final items = (jsonDecode(response.body)['items'] as List);
       return items.map((item) => SpotifyTrack.fromJson(item['track'])).toList();
     } else {
-      throw Exception('Erro ao buscar Top 50 Global: ${response.body}');
+      throw Exception('Erro ao buscar Top 10 Global: ${response.body}');
     }
   }
 }

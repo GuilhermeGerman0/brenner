@@ -3,6 +3,7 @@ import '../models/user.dart';
 import '../services/music_repository.dart';
 import '../models/spotify_track.dart';
 import '../services/api_service.dart';
+import '../widgets/app_drawer.dart';
 
 class ProfileScreen extends StatefulWidget {
   final User user;
@@ -51,14 +52,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .showSnackBar(SnackBar(content: Text(result['message'] ?? 'Bio atualizada!')));
   }
 
-  void _irParaHome() {
-    Navigator.pop(context);
-  }
-
-  void _irParaSearch() {
-    Navigator.pushNamed(context, '/search');
-  }
-
   void _verTodasFavoritas() {
     Navigator.pushNamed(context, '/favoritas');
   }
@@ -76,23 +69,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: Colors.black,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         title: Text(
           widget.user.username,
           style: const TextStyle(color: Colors.white),
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.home),
-            tooltip: 'Home',
-            onPressed: _irParaHome,
-          ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            tooltip: 'Buscar',
-            onPressed: _irParaSearch,
-          ),
-        ],
+        centerTitle: true
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -213,6 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+      drawer: AppDrawer(user: widget.user),
     );
   }
 }

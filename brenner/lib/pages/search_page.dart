@@ -6,6 +6,7 @@ import 'TrackDetailPage.dart'; // <- importe a página de detalhe
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import '../widgets/app_drawer.dart';
 
 class SearchPage extends StatefulWidget {
   final User user;
@@ -86,7 +87,16 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Buscar no Spotify')),
+      drawer: AppDrawer(user: widget.user),
+      appBar: AppBar(
+        title: Text('Buscar no Spotify'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Padding(

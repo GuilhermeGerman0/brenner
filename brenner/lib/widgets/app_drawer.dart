@@ -1,3 +1,4 @@
+import 'package:brenner/pages/login_page.dart';
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../pages/search_page.dart';
@@ -51,6 +52,16 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
+  void _irParaLogin(BuildContext context) {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => LoginScreen()),
+    );
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -92,6 +103,11 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Perfil', style: TextStyle(color: Colors.white)),
             onTap: () => _irParaProfile(context),
           ),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            onTap: () => _irParaLogin(context),
+          )
         ],
       ),
     );

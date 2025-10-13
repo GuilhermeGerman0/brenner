@@ -1,3 +1,4 @@
+import 'package:brenner/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
@@ -35,8 +36,17 @@ class _SalvasScreenState extends State<SalvasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Músicas Salvas')),
       backgroundColor: Colors.black,
+      drawer: AppDrawer(user: widget.user),
+      appBar: AppBar(
+        title: const Text('Músicas Salvas'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
       body: FutureBuilder<List<SpotifyTrack>>(
         future: _salvasFuture,
         builder: (context, snapshot) {
