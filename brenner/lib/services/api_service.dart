@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/tablaturas.dart';
 import '../models/spotify_track.dart';
@@ -91,6 +90,40 @@ class ApiService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
+      return {'success': true, 'message': 'Operação realizada'};
+    } else {
+      final data = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': data['error'] ?? 'Erro desconhecido',
+      };
+    }
+  }
+
+  // PUT genérico
+  static Future<Map<String, dynamic>> httpPut(String path, Map body) async {
+    final url = Uri.parse('$baseUrl$path');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+    if (response.statusCode == 200) {
+      return {'success': true, 'message': 'Operação realizada'};
+    } else {
+      final data = jsonDecode(response.body);
+      return {
+        'success': false,
+        'message': data['error'] ?? 'Erro desconhecido',
+      };
+    }
+  }
+
+  // DELETE genérico
+  static Future<Map<String, dynamic>> httpDelete(String path) async {
+    final url = Uri.parse('$baseUrl$path');
+    final response = await http.delete(url);
+    if (response.statusCode == 200) {
       return {'success': true, 'message': 'Operação realizada'};
     } else {
       final data = jsonDecode(response.body);
@@ -271,5 +304,17 @@ class ApiService {
         'message': data['error'] ?? 'Erro desconhecido',
       };
     }
+  }
+
+  /// Busca os dados do usuário pelo username (ex: email, nome, etc)
+  static Future<Map<String, dynamic>> getUserByUsername(String username) async {
+    final response = await httpGet('/Usuarios/username/$username');
+    if (response is Map<String, dynamic>) {
+      return response;
+    }
+    if (response is List && response.isNotEmpty && response[0] is Map<String, dynamic>) {
+      return response[0];
+    }
+    throw Exception('Usuário não encontrado');
   }
 }

@@ -59,12 +59,15 @@ module.exports = (execQuery) => {
     router.get('/:nomeMusica/:nomeArtista', async (req, res) => {
         let nomeMusica = req.params.nomeMusica.toLowerCase();
         let nomeArtista = req.params.nomeArtista.toLowerCase();
-        // Escapa apóstrofos para evitar erro de SQL
         nomeMusica = nomeMusica.replace(/'/g, "''");
         nomeArtista = nomeArtista.replace(/'/g, "''");
         try{
             const results = await execQuery(
-                `select t.conteudo, u.username from brenner.Tablaturas t join brenner.Usuarios u on t.idUsuario = u.idUsuario where t.idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}') and t.idArtista = (select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}')`
+                `select t.idTablatura, t.idMusica, t.idArtista, t.conteudo, u.username 
+                 from brenner.Tablaturas t 
+                 join brenner.Usuarios u on t.idUsuario = u.idUsuario 
+                 where t.idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}') 
+                 and t.idArtista = (select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}')`
             );
             res.json(results);
         }catch(error){
@@ -121,8 +124,16 @@ module.exports = (execQuery) => {
 
     router.put('/id/:id', async (req, res) => {
         const id = parseInt(req.params.id)
-        const { idMusica, idArtista, idUsuario, conteudo } = req.body
+        let { idMusica, idArtista, username, conteudo } = req.body
+        conteudo = conteudo.replace(/'/g, "''"); // Escapa apóstrofos
         try {
+            // Busca o idUsuario pelo username
+            let usuario = await execQuery(`select idUsuario from brenner.Usuarios where username = '${username}'`)
+            if (!usuario[0]) {
+                return res.status(400).json({error: "Usuário não encontrado"})
+            }
+            const idUsuario = usuario[0].idUsuario
+
             const result = await execQuery(
                 `update brenner.Tablaturas set idMusica = ${idMusica}, idArtista = ${idArtista}, idUsuario = ${idUsuario}, conteudo = '${conteudo}' where idTablatura = ${id}`
             )

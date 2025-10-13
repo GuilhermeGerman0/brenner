@@ -85,74 +85,120 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: AppDrawer(user: widget.user),
-      appBar: AppBar(
-        title: Text('Buscar no Spotify'),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    drawer: AppDrawer(user: widget.user),
+    appBar: AppBar(
+      backgroundColor: const Color(0xFF3B8183),
+      title: const Text('Buscar no Spotify'),
+      leading: Builder(
+        builder: (context) => IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => Scaffold.of(context).openDrawer(),
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Buscar música ou artista...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+    ),
+    body: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar música ou artista...',
+                    hintStyle: const TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Colors.grey[900],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
-                    onSubmitted: (_) => search(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  onSubmitted: (_) => search(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: search,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3B8183),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(onPressed: search, child: const Text('Buscar')),
-              ],
-            ),
-          ),
-          if (isLoading)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
-            )
-          else
-            Expanded(
-              child: ListView.builder(
-                itemCount: resultados.length,
-                itemBuilder: (context, index) {
-                  final track = resultados[index];
-                  return ListTile(
-                    leading: track.imagemUrl.isNotEmpty
-                        ? Image.network(
-                            track.imagemUrl,
-                            width: 50,
-                            fit: BoxFit.cover,
-                          )
-                        : const Icon(Icons.music_note),
-                    title: Text(track.nome),
-                    subtitle: Text('${track.artista} - ${track.album}'),
-                    onTap: () => _abrirDetalheMusica(track),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.open_in_new, color: Colors.green),
-                      onPressed: () => _abrirSpotify(track.spotifyUrl),
-                      tooltip: 'Abrir no Spotify',
-                    ),
-                  );
-                },
+                child: const Text('Buscar', style: TextStyle(color: Colors.white)),
               ),
-            ),
-        ],
-      ),
-    );
-  }
+            ],
+          ),
+        ),
+        if (isLoading)
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: CircularProgressIndicator(color: Colors.white),
+          )
+        else
+          Expanded(
+            child: resultados.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Nenhum resultado encontrado.',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: resultados.length,
+                    itemBuilder: (context, index) {
+                      final track = resultados[index];
+                      return Card(
+                        color: Colors.grey[900],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          leading: track.imagemUrl.isNotEmpty
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    track.imagemUrl,
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const Icon(Icons.music_note, color: Colors.white),
+                          title: Text(
+                            track.nome,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${track.artista} - ${track.album}',
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          onTap: () => _abrirDetalheMusica(track),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.open_in_new, color: Color(0xFF3B8183)),
+                            onPressed: () => _abrirSpotify(track.spotifyUrl),
+                            tooltip: 'Abrir no Spotify',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+      ],
+    ),
+  );
+}
+
 }

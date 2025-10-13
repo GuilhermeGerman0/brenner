@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:brenner/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -100,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+            colors: [Color(0xFFFAD089), Color(0xFFFF9C5B), Color(0xFFF5634A), Color(0xFFED303C)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -108,88 +107,93 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              elevation: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.lock_outline,
-                      size: 64,
-                      color: Colors.blue.shade700,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Bem-vindo!',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 24),
-                    TextField(
-                      controller: usernameController,
-                      decoration: InputDecoration(
-                        labelText: 'Usuário ou Email',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+            child: Center(
+              child: SizedBox(
+                width: 500,
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  elevation: 8,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.lock_outline,
+                          size: 64,
+                          color: Color(0xFF3B8183),
                         ),
-                        prefixIcon: const Icon(Icons.person),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Bem-vindo!',
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        prefixIcon: const Icon(Icons.lock),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (error.isNotEmpty)
-                      Text(
-                        error,
-                        style: const TextStyle(color: Colors.red, fontSize: 14),
-                      ),
-                    const SizedBox(height: 24),
-                    isLoading
-                        ? const CircularProgressIndicator()
-                        : SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                  horizontal: 24,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                backgroundColor: Colors.blue.shade700,
-                              ),
-                              onPressed: login,
-                              child: const Text(
-                                'Entrar',
-                                style: TextStyle(fontSize: 16),
-                              ),
+                        const SizedBox(height: 24),
+                        TextField(
+                          controller: usernameController,
+                          decoration: InputDecoration(
+                            labelText: 'Usuário ou Email',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            prefixIcon: const Icon(Icons.person),
                           ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => SignupScreen()),
-                      ),
-                      child: const Text('Criar conta'),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'Senha',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixIcon: const Icon(Icons.lock),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        if (error.isNotEmpty)
+                          Text(
+                            error,
+                            style: const TextStyle(color: Colors.red, fontSize: 14),
+                          ),
+                        const SizedBox(height: 24),
+                        isLoading
+                            ? const CircularProgressIndicator()
+                            : SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 24,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    backgroundColor: Color(0xFF3B8183),
+                                  ),
+                                  onPressed: login,
+                                  child: const Text(
+                                    'Entrar',
+                                    style: TextStyle(fontSize: 16, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => SignupScreen()),
+                          ),
+                          child: const Text('Criar conta', style: TextStyle(color: Colors.white),),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

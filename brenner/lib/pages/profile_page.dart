@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
-import '../services/music_repository.dart';
-import '../models/spotify_track.dart';
 import '../services/api_service.dart';
 import '../widgets/app_drawer.dart';
 
@@ -18,11 +16,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String bio = "Carregando ...";
   bool isEditingBio = false;
   final TextEditingController _bioController = TextEditingController();
+  String? email; // Novo campo para email
 
   @override
   void initState() {
     super.initState();
     _carregarBio();
+    _carregarEmail(); // Buscar email ao iniciar
   }
 
   Future<void> _carregarBio() async {
@@ -33,6 +33,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : bioApi.toString();
       _bioController.text = bio;
     });
+  }
+
+  Future<void> _carregarEmail() async {
+    try {
+      final userData = await ApiService.getUserByUsername(widget.user.username);
+      print(userData);
+      setState(() {
+        email = userData['email'] ?? widget.user.email;
+      });
+    } catch (e) {
+      setState(() {
+        email = widget.user.email;
+      });
+    }
   }
 
   void _editarBio() {
@@ -52,155 +66,124 @@ class _ProfileScreenState extends State<ProfileScreen> {
         .showSnackBar(SnackBar(content: Text(result['message'] ?? 'Bio atualizada!')));
   }
 
-  void _verTodasFavoritas() {
-    Navigator.pushNamed(context, '/favoritas');
-  }
 
   @override
-  Widget build(BuildContext context) {
-    final Color bgColor = const Color(0xFF121212);
-    final Color cardColor = const Color(0xFF1E1E1E);
-
-    // pega as 4 favoritas
-    final List<SpotifyTrack> favoritasPreview =
-        MusicRepository.favoritas.take(4).toList();
-
-    return Scaffold(
-      backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    appBar: AppBar(
+      backgroundColor: Colors.black,
+      centerTitle: true,
+      title: const Text('Perfil', style: TextStyle(color: Colors.white)),
+      leading: Builder(
+        builder: (context) => IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => Scaffold.of(context).openDrawer(),
+        ),
+      ),
+    ),
+    drawer: AppDrawer(user: widget.user),
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: ListView(
+        children: [
+          Center(
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.grey[800],
+              child: const Icon(Icons.person, size: 60, color: Colors.white),
+            ),
           ),
-        ),
-        title: Text(
-          widget.user.username,
-          style: const TextStyle(color: Colors.white),
-        ),
-        centerTitle: true
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              widget.user.username,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Center(
+            child: Text(
+              email ?? 'Carregando email...',
+              style: TextStyle(color: Colors.grey[400]),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: isEditingBio
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: _bioController,
+                        maxLines: 3,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.grey[850],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          labelText: 'Sua bio',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => setState(() => isEditingBio = false),
+                            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+                          ),
+                          ElevatedButton(
+                            onPressed: _salvarBio,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3B8183),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Salvar', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          bio,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.white54),
+                        tooltip: 'Editar bio',
+                        onPressed: _editarBio,
+                      ),
+                    ],
+                  ),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.grey[800],
-                child: const Icon(Icons.person, size: 60, color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: Text(
-                widget.user.username,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            Center(
-              child: Text(
-                widget.user.email,
-                style: TextStyle(color: Colors.grey[400]),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: isEditingBio
-                  ? Column(
-                      children: [
-                        TextField(
-                          controller: _bioController,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Sua bio',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () =>
-                                  setState(() => isEditingBio = false),
-                              child: const Text('Cancelar'),
-                            ),
-                            ElevatedButton(
-                              onPressed: _salvarBio,
-                              child: const Text('Salvar'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            bio,
-                            textAlign: TextAlign.left,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.white54),
-                          tooltip: 'Editar bio',
-                          onPressed: _editarBio,
-                        ),
-                      ],
-                    ),
-            ),
-            const SizedBox(height: 20),
+    ),
+  );
+}
 
-            //Seção de músicas favoritas
-            if (favoritasPreview.isNotEmpty) ...[
-              Text(
-                'Músicas Favoritas',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Column(
-                children: favoritasPreview.map((track) {
-                  return ListTile(
-                    leading: track.imagemUrl.isNotEmpty
-                        ? Image.network(track.imagemUrl,
-                            width: 50, height: 50, fit: BoxFit.cover)
-                        : const Icon(Icons.music_note, color: Colors.white),
-                    title: Text(track.nome,
-                        style: const TextStyle(color: Colors.white)),
-                    subtitle: Text(track.artista,
-                        style: const TextStyle(color: Colors.white70)),
-                  );
-                }).toList(),
-              ),
-              TextButton(
-                onPressed: _verTodasFavoritas,
-                child: const Text('Ver todas', style: TextStyle(color: Colors.blue)),
-              ),
-            ]
-          ],
-        ),
-      ),
-      drawer: AppDrawer(user: widget.user),
-    );
-  }
 }

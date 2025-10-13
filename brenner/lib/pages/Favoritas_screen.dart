@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
@@ -35,15 +34,23 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color bgColor = const Color(0xFF121212);
+    final Color cardColor = const Color(0xFF1E1E1E);
+    final Color titleColor = Colors.white;
+    final Color subtitleColor = Colors.grey;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: bgColor,
       drawer: AppDrawer(user: widget.user),
       appBar: AppBar(
-        title: const Text('Músicas Favoritas'),
         backgroundColor: Colors.black,
+        title: const Text(
+          'Músicas Favoritas',
+          style: TextStyle(color: Colors.white),
+        ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -80,11 +87,13 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
               itemBuilder: (context, index) {
                 SpotifyTrack track = favoritas[index];
                 return Card(
-                  color: Colors.grey[900],
+                  color: cardColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: ListTile(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     leading: track.imagemUrl.isNotEmpty
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(8),
@@ -98,11 +107,14 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
                         : const Icon(Icons.music_note, color: Colors.white),
                     title: Text(
                       track.nome,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(
+                        color: titleColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     subtitle: Text(
                       track.artista,
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(color: subtitleColor),
                     ),
                     onTap: () async {
                       await Navigator.push(
@@ -114,7 +126,7 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
                           ),
                         ),
                       );
-                      _carregarFavoritas();
+                      _carregarFavoritas(); // Recarrega ao voltar
                     },
                   ),
                 );

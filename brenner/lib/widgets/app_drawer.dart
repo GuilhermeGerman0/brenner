@@ -6,110 +6,122 @@ import '../pages/profile_page.dart';
 import '../pages/Salvas_screen.dart';
 import '../pages/Favoritas_screen.dart';
 import '../pages/home_page.dart';
+import '../services/api_service.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
   final User user;
 
   const AppDrawer({Key? key, required this.user}) : super(key: key);
 
-  void _irparaHome(BuildContext context) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => HomePage(user: user)),
-    );
-  } 
+  @override
+  State<AppDrawer> createState() => _AppDrawerState();
+}
 
-  void _irParaSearch(BuildContext context) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => SearchPage(user: user)),
-    );
+class _AppDrawerState extends State<AppDrawer> {
+  String? email;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarEmail();
   }
 
-  void _irParaProfile(BuildContext context) {
+  Future<void> _carregarEmail() async {
+    try {
+      final userData = await ApiService.getUserByUsername(widget.user.username);
+      setState(() {
+        email = userData['email'] ?? widget.user.email;
+      });
+    } catch (e) {
+      setState(() {
+        email = widget.user.email;
+      });
+    }
+  }
+
+  void _navegar(Widget page) {
     Navigator.pop(context);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ProfileScreen(user: user)),
+      MaterialPageRoute(builder: (_) => page),
     );
   }
-
-  void _irParaSalvas(BuildContext context) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => SalvasScreen(user: user)),
-    );
-  }
-
-  void _irParaFavoritas(BuildContext context) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => FavoritasScreen(user: user)),
-    );
-  }
-
-  void _irParaLogin(BuildContext context) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
-    );
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.grey[900],
+      backgroundColor: const Color.fromARGB(255, 209, 207, 207), // Cor sólida e clara
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            accountName: Text(user.username),
-            accountEmail: Text(user.email),
-            currentAccountPicture: const CircleAvatar(
-              backgroundColor: Colors.white24,
-              child: Icon(Icons.person, color: Colors.white),
+            accountName: Text(
+              widget.user.username,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            decoration: const BoxDecoration(color: Colors.black),
+            accountEmail: Text(email ?? 'Carregando email...'),
+            currentAccountPicture: const CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Icon(Icons.person, size: 40, color: Colors.black),
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFF3B8183), // Cor consistente com botões
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.search, color: Colors.white),
-            title: const Text('Buscar', style: TextStyle(color: Colors.white)),
-            onTap: () => _irParaSearch(context),
+          _buildDrawerItem(
+            icon: Icons.home,
+            text: 'Home',
+            onTap: () => _navegar(HomePage(user: widget.user)),
           ),
-          ListTile(
-            leading: const Icon(Icons.home, color: Colors.white),
-            title: const Text('Home', style: TextStyle(color: Colors.white)),
-            onTap: () => _irparaHome(context),
+          _buildDrawerItem(
+            icon: Icons.search,
+            text: 'Buscar',
+            onTap: () => _navegar(SearchPage(user: widget.user)),
           ),
-          ListTile(
-            leading: const Icon(Icons.favorite, color: Colors.white),
-            title: const Text('Favoritas', style: TextStyle(color: Colors.white)),
-            onTap: () => _irParaFavoritas(context),
+          _buildDrawerItem(
+            icon: Icons.person,
+            text: 'Perfil',
+            onTap: () => _navegar(ProfileScreen(user: widget.user)),
           ),
-          ListTile(
-            leading: const Icon(Icons.save, color: Colors.white),
-            title: const Text('Salvas', style: TextStyle(color: Colors.white)),
-            onTap: () => _irParaSalvas(context),
+          _buildDrawerItem(
+            icon: Icons.bookmark,
+            text: 'Salvas',
+            onTap: () => _navegar(SalvasScreen(user: widget.user)),
           ),
-          ListTile(
-            leading: const Icon(Icons.person, color: Colors.white),
-            title: const Text('Perfil', style: TextStyle(color: Colors.white)),
-            onTap: () => _irParaProfile(context),
+          _buildDrawerItem(
+            icon: Icons.favorite,
+            text: 'Favoritas',
+            onTap: () => _navegar(FavoritasScreen(user: widget.user)),
           ),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
-            onTap: () => _irParaLogin(context),
-          )
+          const Divider(indent: 16, endIndent: 16),
+          _buildDrawerItem(
+            icon: Icons.logout,
+            text: 'Sair',
+            onTap: () => _navegar(LoginScreen()),
+            color: Colors.red,
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: color ?? Colors.black87),
+      title: Text(
+        text,
+        style: TextStyle(
+          color: color ?? Colors.black87,
+          fontSize: 16,
+        ),
+      ),
+      onTap: onTap,
+      hoverColor: Colors.grey.shade200,
     );
   }
 }

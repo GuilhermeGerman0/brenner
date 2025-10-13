@@ -1,6 +1,5 @@
 import 'package:brenner/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
@@ -35,14 +34,23 @@ class _SalvasScreenState extends State<SalvasScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color bgColor = const Color(0xFF121212);
+    final Color cardColor = const Color(0xFF1E1E1E);
+    final Color titleColor = Colors.white;
+    final Color subtitleColor = Colors.grey;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: bgColor,
       drawer: AppDrawer(user: widget.user),
       appBar: AppBar(
-        title: const Text('Músicas Salvas'),
+        backgroundColor: Colors.black,
+        title: const Text(
+          'Músicas Salvas',
+          style: TextStyle(color: Colors.white),
+        ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -76,36 +84,39 @@ class _SalvasScreenState extends State<SalvasScreen> {
             itemBuilder: (context, index) {
               SpotifyTrack track = salvas[index];
               return Card(
-                color: Colors.grey[900],
+                color: cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   leading: track.imagemUrl.isNotEmpty
-                      ? Image.network(
-                          track.imagemUrl,
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            track.imagemUrl,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          ),
                         )
                       : const Icon(Icons.music_note, color: Colors.white),
                   title: Text(
                     track.nome,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: titleColor, fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
                     track.artista,
-                    style: const TextStyle(color: Colors.grey),
+                    style: TextStyle(color: subtitleColor),
                   ),
                   onTap: () async {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            TrackDetailPage(track: track, user: widget.user),
+                        builder: (_) => TrackDetailPage(track: track, user: widget.user),
                       ),
                     );
-                    _carregarSalvas();
+                    _carregarSalvas(); // Recarrega após voltar
                   },
                 ),
               );

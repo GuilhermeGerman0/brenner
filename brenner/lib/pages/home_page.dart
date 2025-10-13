@@ -6,7 +6,6 @@ import '../models/spotify_track.dart';
 import '../services/spotify_service.dart';
 import '../widgets/app_drawer.dart';
 import 'TrackDetailPage.dart';
-import 'Favoritas_screen.dart';
 import '../services/api_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -38,21 +37,16 @@ class _HomePageState extends State<HomePage> {
     try {
       final apiService = ApiService();
       final favoritas = await apiService.getMusicasFavoritasPorUsername(widget.user.username);
-      print('Músicas favoritas: ${favoritas}');
       if (favoritas.isNotEmpty) {
 
         final ultimaFavorita = favoritas.last;
-        print('Ultima música favoritada: ${ultimaFavorita}');
         final artistName = ultimaFavorita.artista;
         final artistId = await _spotifyService.getArtistIdByName(artistName);
         String? genero;
         if (artistId != null) {
-          print('pegou o genero');
           genero = await _spotifyService.getArtistGenre(artistId);
         }
-        print('O genero é: ${genero}');
         if (genero != null && genero.isNotEmpty) {
-          print('Genero do artista: ${genero}');
           final tracks = await _spotifyService.searchTracksByGenre(genero);
           setState(() => ultimasMusicas = tracks);
         }else{
@@ -105,106 +99,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      drawer: AppDrawer(user: widget.user),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.black,
-        title: const Text('Brenner Músicas'),
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.black, // fundo escuro elegante
+    drawer: AppDrawer(user: widget.user),
+    appBar: AppBar(
+      elevation: 0,
+      backgroundColor: const Color(0xFF3B8183), // consistente com botões
+      title: const Text('Brenner Músicas'),
+      leading: Builder(
+        builder: (context) => IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () => Scaffold.of(context).openDrawer(),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: _carregarDados,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (historicoMusicas.isNotEmpty) ...[
-                const Text(
-                  'Músicas visitadas recentemente',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 150,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: historicoMusicas.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final track = historicoMusicas[index];
-                      return GestureDetector(
-                        onTap: () => _abrirDetalheMusica(track),
-                        child: Container(
-                          width: 120,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[850],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 8),
-                              if (track.imagemUrl.isNotEmpty)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    track.imagemUrl,
-                                    width: 100,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              else
-                                const Icon(
-                                  Icons.music_note,
-                                  size: 60,
-                                  color: Colors.white,
-                                ),
-                              const SizedBox(height: 6),
-                              Text(
-                                track.nome,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                track.artista,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
+    ),
+    body: RefreshIndicator(
+      onRefresh: _carregarDados,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (historicoMusicas.isNotEmpty) ...[
               const Text(
-                'Músicas recomendadas para você',
+                'Músicas visitadas recentemente',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -212,59 +132,135 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              if (ultimasMusicas.isEmpty)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else
-                Column(
-                  children: ultimasMusicas.map((track) {
-                    return Card(
-                      color: Colors.grey[900],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        leading: track.imagemUrl.isNotEmpty
-                            ? ClipRRect(
+              SizedBox(
+                height: 150,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: historicoMusicas.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final track = historicoMusicas[index];
+                    return GestureDetector(
+                      onTap: () => _abrirDetalheMusica(track),
+                      child: Container(
+                        width: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[850],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (track.imagemUrl.isNotEmpty)
+                              ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.network(
                                   track.imagemUrl,
-                                  width: 40,
-                                  height: 40,
+                                  width: 100,
+                                  height: 80,
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : const CircleAvatar(
-                                backgroundColor: Colors.blue,
-                                child: Icon(
-                                  Icons.music_note,
-                                  color: Colors.white,
-                                ),
+                            else
+                              const Icon(
+                                Icons.music_note,
+                                size: 60,
+                                color: Colors.white,
                               ),
-                        title: Text(
-                          track.nome,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                            const SizedBox(height: 6),
+                            Text(
+                              track.nome,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              track.artista,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
-                        subtitle: Text(
-                          '${track.artista} • ${track.album}',
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        onTap: () => _abrirDetalheMusica(track),
                       ),
                     );
-                  }).toList(),
+                  },
                 ),
+              ),
+              const SizedBox(height: 24),
             ],
-          ),
+            const Text(
+              'Músicas recomendadas para você',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (ultimasMusicas.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              )
+            else
+              Column(
+                children: ultimasMusicas.map((track) {
+                  return Card(
+                    color: Colors.grey[900],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      leading: track.imagemUrl.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                track.imagemUrl,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const CircleAvatar(
+                              backgroundColor: Colors.blue,
+                              child: Icon(
+                                Icons.music_note,
+                                color: Colors.white,
+                              ),
+                            ),
+                      title: Text(
+                        track.nome,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${track.artista} • ${track.album}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      onTap: () => _abrirDetalheMusica(track),
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

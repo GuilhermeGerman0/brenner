@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../models/tablaturas.dart'; 
 import '../services/api_service.dart';
@@ -143,7 +140,7 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                   children: [
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Color(0xFF3B8183),
                         foregroundColor: Colors.white,
                       ),
                       icon: const Icon(Icons.play_arrow),
@@ -254,56 +251,165 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                     final tablaturas = snapshot.data!;
                     return Column(
                       children: tablaturas.map((tab) {
-                        return Card(
-                          color: Colors.grey[900],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: ListTile(
-                            leading: const Icon(
-                              Icons.library_music,
-                              color: Colors.white,
+                        final isOwner = tab.username == widget.user.username;
+                        return MouseRegion(
+                          cursor: isOwner ? SystemMouseCursors.click : MouseCursor.defer,
+                          child: Card(
+                            color: Colors.grey[900],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            title: Text(
-                              tab.conteudo.length > 50
-                                  ? '${tab.conteudo.substring(0, 50)}...'
-                                  : tab.conteudo,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            subtitle: Text(
-                              'Postado por: ${tab.username}',
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                            onTap: () {
-                              showDialog(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                  backgroundColor: Colors.grey[900],
-                                  title: Text(
-                                    'Tablatura - ${widget.track.nome}',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  content: SingleChildScrollView(
-                                    child: Text(
-                                      tab.conteudo,
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                            child: ListTile(
+                              leading: const Icon(
+                                Icons.library_music,
+                                color: Colors.white,
+                              ),
+                              title: Text(
+                                tab.conteudo.length > 50
+                                    ? '${tab.conteudo.substring(0, 50)}...'
+                                    : tab.conteudo,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              subtitle: Text(
+                                'Postado por: ${tab.username}',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    backgroundColor: Colors.grey[900],
+                                    title: Text(
+                                      'Tablatura - ${widget.track.nome}',
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                    content: SingleChildScrollView(
+                                      child: Text(
+                                        tab.conteudo,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      child: const Text(
-                                        'Fechar',
-                                        style: TextStyle(color: Colors.green),
+                                    actions: [
+                                      if (isOwner)
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              tooltip: 'Editar',
+                                              icon: const Icon(Icons.edit, color: Color(0xFF3B8183)),
+                                              onPressed: () async {
+                                                Navigator.of(context).pop();
+                                                final controller = TextEditingController(text: tab.conteudo);
+                                                final edited = await showDialog<String>(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                    title: const Text('Editar Tablatura'),
+                                                    content: TextField(
+                                                      controller: controller,
+                                                      maxLines: 8,
+                                                      decoration: const InputDecoration(
+                                                        labelText: 'Edite a tablatura',
+                                                        border: OutlineInputBorder(),
+                                                      ),
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(context),
+                                                        child: const Text('Cancelar'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () => Navigator.pop(context, controller.text.trim()),
+                                                        child: const Text('Salvar'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                if (edited != null && edited.isNotEmpty && edited != tab.conteudo) {
+                                                  try {
+                                                    await ApiService.httpPut(
+                                                      '/tablaturas/id/${tab.id}',
+                                                      {
+                                                        'idMusica': tab.idMusica,
+                                                        'idArtista': tab.idArtista,
+                                                        'username': widget.user.username,
+                                                        'conteudo': edited,
+                                                      },
+                                                    );
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(content: Text('Tablatura editada com sucesso!')),
+                                                    );
+                                                    setState(() {
+                                                      _tablaturasFuture = ApiService.getTablaturas(
+                                                        widget.track.nome,
+                                                        widget.track.artista,
+                                                      );
+                                                    });
+                                                  } catch (e) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(content: Text('Erro ao editar tablatura: $e')),
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                            ),
+                                            IconButton(
+                                              tooltip: 'Excluir',
+                                              icon: const Icon(Icons.more_horiz, color: Colors.redAccent),
+                                              onPressed: () async {
+                                                final confirm = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                    title: const Text('Excluir Tablatura'),
+                                                    content: const Text('Tem certeza que deseja excluir esta tablatura?'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(context, false),
+                                                        child: const Text('Cancelar'),
+                                                      ),
+                                                      ElevatedButton(
+                                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                                                        onPressed: () => Navigator.pop(context, true),
+                                                        child: const Text('Excluir'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                if (confirm == true) {
+                                                  try {
+                                                    await ApiService.httpDelete('/tablaturas/id/${tab.id}');
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(content: Text('Tablatura excluída com sucesso!')),
+                                                    );
+                                                    setState(() {
+                                                      _tablaturasFuture = ApiService.getTablaturas(
+                                                        widget.track.nome,
+                                                        widget.track.artista,
+                                                      );
+                                                    });
+                                                  } catch (e) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(content: Text('Erro ao excluir tablatura: $e')),
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      TextButton(
+                                        child: const Text(
+                                          'Fechar',
+                                          style: TextStyle(color: Color(0xFF3B8183)),
+                                        ),
+                                        onPressed: () => Navigator.of(context).pop(),
                                       ),
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         );
                       }).toList(),
@@ -369,7 +475,7 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
             }
           }
         },
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFF3B8183),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
