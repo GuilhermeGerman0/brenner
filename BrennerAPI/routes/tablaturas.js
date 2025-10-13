@@ -19,10 +19,17 @@ module.exports = (execQuery) => {
     router.post('/nome', async (req, res) => {
         const nomeMusica = req.body.nomeMusica.toLowerCase()
         const nomeArtista = req.body.nomeArtista.toLowerCase()
-        const idUsuario = req.body.idUsuario
+        const username = req.body.username
         let conteudo = req.body.conteudo
         conteudo = conteudo.replace(/'/g, "''") 
         try {
+            // Busca o idUsuario pelo username
+            let usuario = await execQuery(`select idUsuario from brenner.Usuarios where username = '${username}'`)
+            if (!usuario[0]) {
+                return res.status(400).json({error: "Usuário não encontrado"})
+            }
+            const idUsuario = usuario[0].idUsuario
+
             let artista = await execQuery(`select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}'`)
             let idArtista
             if (!artista[0]) {

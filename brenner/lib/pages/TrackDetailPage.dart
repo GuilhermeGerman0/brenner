@@ -315,6 +315,63 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final conteudoController = TextEditingController();
+          final result = await showDialog<String>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Adicionar Tablatura'),
+              content: TextField(
+                controller: conteudoController,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  labelText: 'Digite a tablatura',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, conteudoController.text.trim()),
+                  child: const Text('Salvar'),
+                ),
+              ],
+            ),
+          );
+          if (result != null && result.isNotEmpty) {
+            try {
+              await ApiService.httpPost(
+                '/tablaturas/nome',
+                {
+                  'nomeMusica': widget.track.nome,
+                  'nomeArtista': widget.track.artista,
+                  'username': widget.user.username,
+                  'conteudo': result,
+                },
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Tablatura adicionada com sucesso!')),
+              );
+              setState(() {
+                _tablaturasFuture = ApiService.getTablaturas(
+                  widget.track.nome,
+                  widget.track.artista,
+                );
+              });
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erro ao adicionar tablatura: $e')),
+              );
+            }
+          }
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 }
