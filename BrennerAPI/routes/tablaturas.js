@@ -57,27 +57,33 @@ module.exports = (execQuery) => {
     // Pesquisar por nome e artista e pegar o username do usuário que postou
 
     router.get('/:nomeMusica/:nomeArtista', async (req, res) => {
-        const nomeMusica = req.params.nomeMusica.toLowerCase()
-        const nomeArtista = req.params.nomeArtista.toLowerCase()
+        let nomeMusica = req.params.nomeMusica.toLowerCase();
+        let nomeArtista = req.params.nomeArtista.toLowerCase();
+        // Escapa apóstrofos para evitar erro de SQL
+        nomeMusica = nomeMusica.replace(/'/g, "''");
+        nomeArtista = nomeArtista.replace(/'/g, "''");
         try{
-            const results = await execQuery(`select t.conteudo, u.username from brenner.Tablaturas t join brenner.Usuarios u on t.idUsuario = u.idUsuario where t.idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}') and t.idArtista = (select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}')`)
-            res.json(results)
+            const results = await execQuery(
+                `select t.conteudo, u.username from brenner.Tablaturas t join brenner.Usuarios u on t.idUsuario = u.idUsuario where t.idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}') and t.idArtista = (select idArtista from brenner.Artistas where nomeArtista = '${nomeArtista}')`
+            );
+            res.json(results);
         }catch(error){
-            return res.status(500).json({error: "Erro ao buscar a tablatura - tablatura para essa música e artista não encontrada"})
+            return res.status(500).json({error: "Erro ao buscar a tablatura - tablatura para essa música e artista não encontrada"});
         }
     })
-
-    
 
     // Pesquisa por nome da música
 
     router.get('/:nomeMusica', async (req, res) => {
-        const nomeMusica = req.params.nomeMusica
+        let nomeMusica = req.params.nomeMusica;
+        nomeMusica = nomeMusica.replace(/'/g, "''");
         try{
-            const results = await execQuery(`select conteudo from brenner.Tablaturas where idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}')`)
-            res.json(results)
+            const results = await execQuery(
+                `select conteudo from brenner.Tablaturas where idMusica = (select idMusica from brenner.Musicas where nomeMusica = '${nomeMusica}')`
+            );
+            res.json(results);
         }catch(error){
-            return res.status(500).json({error: "Erro ao buscar a tablatura - tablatura para essa música não encontrada"})
+            return res.status(500).json({error: "Erro ao buscar a tablatura - tablatura para essa música não encontrada"});
         }
     })
 

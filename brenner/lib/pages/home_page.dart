@@ -38,16 +38,25 @@ class _HomePageState extends State<HomePage> {
     try {
       final apiService = ApiService();
       final favoritas = await apiService.getMusicasFavoritasPorUsername(widget.user.username);
+      print('Músicas favoritas: ${favoritas}');
       if (favoritas.isNotEmpty) {
+
         final ultimaFavorita = favoritas.last;
+        print('Ultima música favoritada: ${ultimaFavorita}');
         final artistName = ultimaFavorita.artista;
         final artistId = await _spotifyService.getArtistIdByName(artistName);
         String? genero;
         if (artistId != null) {
+          print('pegou o genero');
           genero = await _spotifyService.getArtistGenre(artistId);
         }
+        print('O genero é: ${genero}');
         if (genero != null && genero.isNotEmpty) {
+          print('Genero do artista: ${genero}');
           final tracks = await _spotifyService.searchTracksByGenre(genero);
+          setState(() => ultimasMusicas = tracks);
+        }else{
+          final tracks = await _spotifyService.searchTracksByGenre('pop');
           setState(() => ultimasMusicas = tracks);
         }
       }else{

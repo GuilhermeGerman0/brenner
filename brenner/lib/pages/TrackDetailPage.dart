@@ -369,7 +369,7 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
             }
           }
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.green,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

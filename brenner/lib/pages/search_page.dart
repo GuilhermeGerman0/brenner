@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/spotify_service.dart';
 import '../models/spotify_track.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'TrackDetailPage.dart'; // <- importe a página de detalhe
+import 'TrackDetailPage.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
