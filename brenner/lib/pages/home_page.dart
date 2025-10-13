@@ -1,16 +1,11 @@
 import 'dart:convert';
-import 'package:brenner/pages/Favoritas_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/spotify_track.dart';
 import '../services/spotify_service.dart';
+import '../widgets/app_drawer.dart';
 import 'TrackDetailPage.dart';
-import 'search_page.dart';
-import 'profile_page.dart';
-import 'Salvas_screen.dart';
-
-
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -23,7 +18,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<SpotifyTrack> ultimasMusicas = [];
   List<SpotifyTrack> historicoMusicas = [];
-
   final SpotifyService _spotifyService = SpotifyService();
 
   @override
@@ -37,9 +31,6 @@ class _HomePageState extends State<HomePage> {
     await _carregarHistorico();
   }
 
-  // ======================================
-  // Músicas mais ouvidas do momento
-  // ======================================
   Future<void> _carregarUltimasMusicas() async {
     try {
       final topTracks = await _spotifyService.searchTracks('top', limit: 10);
@@ -49,18 +40,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // ======================================
-  // Histórico
-  // ======================================
   Future<void> _carregarHistorico() async {
     final prefs = await SharedPreferences.getInstance();
     final historicoJson = prefs.getStringList('historico_musicas') ?? [];
     setState(() {
       historicoMusicas = historicoJson
-          .map(
-            (e) =>
-                SpotifyTrack.fromJson(Map<String, dynamic>.from(jsonDecode(e))),
-          )
+          .map((e) => SpotifyTrack.fromJson(
+                Map<String, dynamic>.from(jsonDecode(e)),
+              ))
           .toList();
     });
   }
@@ -72,9 +59,8 @@ class _HomePageState extends State<HomePage> {
     if (historicoMusicas.length > 10) {
       historicoMusicas = historicoMusicas.sublist(0, 10);
     }
-    final historicoJson = historicoMusicas
-        .map((t) => jsonEncode(t.toJson()))
-        .toList();
+    final historicoJson =
+        historicoMusicas.map((t) => jsonEncode(t.toJson())).toList();
     await prefs.setStringList('historico_musicas', historicoJson);
     setState(() {});
   }
@@ -90,95 +76,11 @@ class _HomePageState extends State<HomePage> {
     _carregarHistorico();
   }
 
-  void _irParaSearch() => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => SearchPage(user: widget.user)),
-  );
-
-  void _irParaProfile() => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => ProfileScreen(user: widget.user)),
-  );
-
-  void _irParaSalvas() => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => SalvasScreen(user: widget.user)),
-  );
-  void _irParaFavoritas() => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => FavoritasScreen(user: widget.user)),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      drawer: Drawer(
-        backgroundColor: Colors.grey[900],
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(widget.user.username),
-              accountEmail: Text(widget.user.email),
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white24,
-                child: Icon(Icons.person, color: Colors.white),
-              ),
-              decoration: const BoxDecoration(color: Colors.black),
-            ),
-            ListTile(
-              leading: const Icon(Icons.search, color: Colors.white),
-              title: const Text(
-                'Buscar',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _irParaSearch();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.home, color: Colors.white),
-              title: const Text('Home', style: TextStyle(color: Colors.white)),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite, color: Colors.white),
-              title: const Text(
-                'Favoritas',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _irParaFavoritas();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.save, color: Colors.white),
-              title: const Text(
-                'Salvas',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _irParaSalvas();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person, color: Colors.white),
-              title: const Text(
-                'Perfil',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _irParaProfile();
-              },
-            )
-          ],
-        ),
-      ),
+      drawer: AppDrawer(user: widget.user),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.black,
@@ -198,7 +100,6 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Histórico
               if (historicoMusicas.isNotEmpty) ...[
                 const Text(
                   'Músicas visitadas recentemente',
@@ -274,8 +175,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 24),
               ],
-
-              // Músicas mais ouvidas do momento
               const Text(
                 'Músicas mais ouvidas do momento',
                 style: TextStyle(

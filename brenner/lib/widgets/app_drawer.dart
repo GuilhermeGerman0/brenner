@@ -1,36 +1,54 @@
 import 'package:flutter/material.dart';
-import '../pages/profile_page.dart';
-import '../pages/salvas_screen.dart';
-import '../pages/search_page.dart';
 import '../models/user.dart';
+import '../pages/search_page.dart';
+import '../pages/profile_page.dart';
+import '../pages/Salvas_screen.dart';
 import '../pages/Favoritas_screen.dart';
+import '../pages/home_page.dart';
 
 class AppDrawer extends StatelessWidget {
   final User user;
+
   const AppDrawer({Key? key, required this.user}) : super(key: key);
 
-  void _irParaHome(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/');
+  void _irparaHome(BuildContext context) {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => HomePage(user: user)),
+    );
+  } 
+
+  void _irParaSearch(BuildContext context) {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SearchPage(user: user)),
+    );
   }
 
   void _irParaProfile(BuildContext context) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (_) => ProfileScreen(user: user)));
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProfileScreen(user: user)),
+    );
   }
 
   void _irParaSalvas(BuildContext context) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (_) =>  SalvasScreen(user:user)));
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SalvasScreen(user: user)),
+    );
   }
 
   void _irParaFavoritas(BuildContext context) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (_) =>  FavoritasScreen(user:user)));
-  }
-
-  void _irParaSearch(BuildContext context) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (_) => SearchPage(user:user)));
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => FavoritasScreen(user: user)),
+    );
   }
 
   @override
@@ -50,45 +68,29 @@ class AppDrawer extends StatelessWidget {
             decoration: const BoxDecoration(color: Colors.black),
           ),
           ListTile(
+            leading: const Icon(Icons.search, color: Colors.white),
+            title: const Text('Buscar', style: TextStyle(color: Colors.white)),
+            onTap: () => _irParaSearch(context),
+          ),
+          ListTile(
             leading: const Icon(Icons.home, color: Colors.white),
             title: const Text('Home', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context);
-              _irParaHome(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person, color: Colors.white),
-            title: const Text('Perfil', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              print("fezes12134342453456346");
-              Navigator.pop(context);
-              _irParaProfile(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.save, color: Colors.white),
-            title: const Text('Salvas', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context);
-              _irParaSalvas(context);
-            },
+            onTap: () => _irparaHome(context),
           ),
           ListTile(
             leading: const Icon(Icons.favorite, color: Colors.white),
             title: const Text('Favoritas', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context); 
-              _irParaFavoritas(context);
-            },
+            onTap: () => _irParaFavoritas(context),
           ),
           ListTile(
-            leading: const Icon(Icons.search, color: Colors.white),
-            title: const Text('Buscar', style: TextStyle(color: Colors.white)),
-            onTap: () {
-              Navigator.pop(context);
-              _irParaSearch(context);
-            },
+            leading: const Icon(Icons.save, color: Colors.white),
+            title: const Text('Salvas', style: TextStyle(color: Colors.white)),
+            onTap: () => _irParaSalvas(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.white),
+            title: const Text('Perfil', style: TextStyle(color: Colors.white)),
+            onTap: () => _irParaProfile(context),
           ),
         ],
       ),

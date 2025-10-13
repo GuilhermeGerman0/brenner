@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spotify_track.dart';
 import '../services/api_service.dart';
 import '../models/user.dart';
+import '../widgets/app_drawer.dart';
 import 'TrackDetailPage.dart';
 
 class FavoritasScreen extends StatefulWidget {
@@ -35,8 +36,18 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Músicas Favoritas')),
       backgroundColor: Colors.black,
+      drawer: AppDrawer(user: widget.user),
+      appBar: AppBar(
+        title: const Text('Músicas Favoritas'),
+        backgroundColor: Colors.black,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
       body: FutureBuilder<List<SpotifyTrack>>(
         future: _favoritasFuture,
         builder: (context, snapshot) {
@@ -60,46 +71,55 @@ class _FavoritasScreenState extends State<FavoritasScreen> {
           }
 
           final favoritas = snapshot.data!;
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: favoritas.length,
-            itemBuilder: (context, index) {
-              SpotifyTrack track = favoritas[index];
-              return Card(
-                color: Colors.grey[900],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  leading: track.imagemUrl.isNotEmpty
-                      ? Image.network(
-                          track.imagemUrl,
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(Icons.music_note, color: Colors.white),
-                  title: Text(
-                    track.nome,
-                    style: const TextStyle(color: Colors.white),
+          return RefreshIndicator(
+            onRefresh: _carregarFavoritas,
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: favoritas.length,
+              itemBuilder: (context, index) {
+                SpotifyTrack track = favoritas[index];
+                return Card(
+                  color: Colors.grey[900],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  subtitle: Text(
-                    track.artista,
-                    style: const TextStyle(color: Colors.grey),
+                  child: ListTile(
+                    leading: track.imagemUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              track.imagemUrl,
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : const Icon(Icons.music_note, color: Colors.white),
+                    title: Text(
+                      track.nome,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    subtitle: Text(
+                      track.artista,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TrackDetailPage(
+                            track: track,
+                            user: widget.user,
+                          ),
+                        ),
+                      );
+                      _carregarFavoritas();
+                    },
                   ),
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            TrackDetailPage(track: track, user: widget.user),
-                      ),
-                    );
-                    _carregarFavoritas();
-                  },
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

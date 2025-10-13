@@ -181,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 20),
 
-            // 🔥 Seção de músicas favoritas
+            //Seção de músicas favoritas
             if (favoritasPreview.isNotEmpty) ...[
               Text(
                 'Músicas Favoritas',
