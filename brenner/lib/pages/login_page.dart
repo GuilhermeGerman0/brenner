@@ -34,6 +34,7 @@ class BiometricAuth {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final FocusNode passwordFocusNode = FocusNode();
   bool isLoading = false;
   String error = '';
 
@@ -134,6 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 24),
                         TextField(
                           controller: usernameController,
+                          textInputAction: TextInputAction.next,
+                          onSubmitted: (_) {
+                            FocusScope.of(context).requestFocus(passwordFocusNode);
+                          },
                           decoration: InputDecoration(
                             labelText: 'Usuário ou Email',
                             border: OutlineInputBorder(
@@ -145,6 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: passwordController,
+                          focusNode: passwordFocusNode,
                           obscureText: true,
                           decoration: InputDecoration(
                             labelText: 'Senha',
@@ -153,6 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             prefixIcon: const Icon(Icons.lock),
                           ),
+                          onSubmitted: (_) => login(),
                         ),
                         const SizedBox(height: 16),
                         if (error.isNotEmpty)

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/spotify_track.dart';
@@ -356,7 +357,7 @@ class _TrackDetailPageState extends State<TrackDetailPage> {
                                             ),
                                             IconButton(
                                               tooltip: 'Excluir',
-                                              icon: const Icon(Icons.more_horiz, color: Colors.redAccent),
+                                              icon: const Icon(CupertinoIcons.trash , color: Colors.redAccent),
                                               onPressed: () async {
                                                 final confirm = await showDialog<bool>(
                                                   context: context,

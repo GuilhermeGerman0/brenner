@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     historicoMusicas.clear();
+    ultimasMusicas.clear();
     _carregarDados();
   }
 
@@ -33,30 +34,36 @@ class _HomePageState extends State<HomePage> {
     await _carregarHistorico();
   }
 
+  
   Future<void> _carregarUltimasMusicas() async {
     try {
       final apiService = ApiService();
       final favoritas = await apiService.getMusicasFavoritasPorUsername(widget.user.username);
-      if (favoritas.isNotEmpty) {
 
-        final ultimaFavorita = favoritas.last;
-        final artistName = ultimaFavorita.artista;
-        final artistId = await _spotifyService.getArtistIdByName(artistName);
-        String? genero;
+      // 1. Buscar gêneros das favoritas
+      List<String> generos = [];
+      for (final fav in favoritas) {
+        final artistId = await _spotifyService.getArtistIdByName(fav.artista);
         if (artistId != null) {
-          genero = await _spotifyService.getArtistGenre(artistId);
+          final genero = await _spotifyService.getArtistGenre(artistId);
+          if (genero != null && genero.isNotEmpty) {
+            generos.add(genero);
+          }
         }
-        if (genero != null && genero.isNotEmpty) {
-          final tracks = await _spotifyService.searchTracksByGenre(genero);
-          setState(() => ultimasMusicas = tracks);
-        }else{
-          final tracks = await _spotifyService.searchTracksByGenre('pop');
-          setState(() => ultimasMusicas = tracks);
-        }
-      }else{
-        final tracks = await _spotifyService.searchTracksByGenre('rock nacional brasileiro');
-        setState(() => ultimasMusicas = tracks);
       }
+      generos = generos.toSet().toList(); // remove duplicados
+
+      if (generos.isEmpty) generos = ['pop', 'rock', 'mpb'];
+
+      generos.shuffle();
+      final generosAleatorios = generos.take(3).toList(); 
+      List<SpotifyTrack> tracks = [];
+      for (final genero in generosAleatorios) {
+        final tracksGenero = await _spotifyService.searchTracksByGenre(genero);
+        tracks.addAll(tracksGenero);
+      }
+
+      setState(() => ultimasMusicas = tracks);
     } catch (e) {
       debugPrint('Erro ao carregar top tracks: $e');
     }
